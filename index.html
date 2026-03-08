@@ -828,23 +828,42 @@ let editingChoreId = null, editingKidId = null, calYear, calMonth, currentView =
 let timerInterval = null;
 let kidFormState = { emoji: '🌟', color: CARD_COLORS[0] };
 
+// Storage abstraction: swap for Firebase/remote later. Single API for all persistence.
+const storage = {
+  get(key) { try { return localStorage.getItem(key); } catch (e) { return null; } },
+  set(key, val) { try { localStorage.setItem(key, val); } catch (e) {} },
+  remove(key) { try { localStorage.removeItem(key); } catch (e) {} }
+};
+
+const DATA_KEY_PREFIX = 'cs_data_';
 function kidKey(suffix) { return `cs_${suffix}_${activeKidId}`; }
+function kidDataKey(kidId) { return DATA_KEY_PREFIX + (kidId || activeKidId); }
 
 function loadKids() {
-  kids = JSON.parse(localStorage.getItem('cs_kids') || '[]');
-  activeKidId = localStorage.getItem('cs_active_kid') || null;
+  kids = JSON.parse(storage.get('cs_kids') || '[]');
+  activeKidId = storage.get('cs_active_kid') || null;
 }
 function saveKids() {
-  localStorage.setItem('cs_kids', JSON.stringify(kids));
-  if (activeKidId) localStorage.setItem('cs_active_kid', activeKidId);
+  storage.set('cs_kids', JSON.stringify(kids));
+  if (activeKidId) storage.set('cs_active_kid', activeKidId);
 }
 
 function loadData() {
   if (!activeKidId) return;
   try {
-    chores       = JSON.parse(localStorage.getItem(kidKey('chores'))   || '[]');
-    sessions     = JSON.parse(localStorage.getItem(kidKey('sessions')) || '[]');
-    activeTimers = JSON.parse(localStorage.getItem(kidKey('timers'))   || '{}');
+    const dataKey = kidDataKey();
+    const bundled = storage.get(dataKey);
+    if (bundled) {
+      const data = JSON.parse(bundled);
+      chores       = Array.isArray(data.chores)   ? data.chores   : [];
+      sessions     = Array.isArray(data.sessions) ? data.sessions : [];
+      activeTimers = data.timers && typeof data.timers === 'object' ? data.timers : {};
+    } else {
+      // Backwards compatibility: load from legacy per-type keys
+      chores       = JSON.parse(storage.get(kidKey('chores'))   || '[]');
+      sessions     = JSON.parse(storage.get(kidKey('sessions')) || '[]');
+      activeTimers = JSON.parse(storage.get(kidKey('timers'))   || '{}');
+    }
     const now = Date.now();
     Object.keys(activeTimers).forEach(cid => {
       const t = activeTimers[cid];
@@ -861,12 +880,56 @@ function loadData() {
   recalcBalance();
 }
 
+// Debounce and throttle for Firebase-friendly write rate (one write per batch, timer at most every 10s)
+let saveDataTimer = null;
+let lastTimerSaveAt = 0;
+const SAVE_DEBOUNCE_MS = 150;
+const TIMER_SAVE_INTERVAL_MS = 10000;
+
+function persistData() {
+  if (!activeKidId) return;
+  storage.set(kidDataKey(), JSON.stringify({
+    chores: chores,
+    sessions: sessions,
+    timers: activeTimers
+  }));
+}
+
+function saveDataNow() {
+  if (saveDataTimer) { clearTimeout(saveDataTimer); saveDataTimer = null; }
+  persistData();
+}
 
 function saveData() {
   if (!activeKidId) return;
-  localStorage.setItem(kidKey('chores'),   JSON.stringify(chores));
-  localStorage.setItem(kidKey('sessions'), JSON.stringify(sessions));
-  localStorage.setItem(kidKey('timers'),   JSON.stringify(activeTimers));
+  if (saveDataTimer) clearTimeout(saveDataTimer);
+  saveDataTimer = setTimeout(() => {
+    saveDataTimer = null;
+    persistData();
+  }, SAVE_DEBOUNCE_MS);
+}
+
+// Call from timer tick only: throttled save so we don't write every second
+function saveDataIfTimerThrottle() {
+  if (Date.now() - lastTimerSaveAt < TIMER_SAVE_INTERVAL_MS) return;
+  lastTimerSaveAt = Date.now();
+  saveDataNow();
+}
+
+// Compute balance for any kid from stored sessions (one read per kid when opening picker)
+function getKidBalance(kidId) {
+  if (!kidId) return 0;
+  try {
+    const bundled = storage.get(kidDataKey(kidId));
+    let sess = [];
+    if (bundled) {
+      const data = JSON.parse(bundled);
+      sess = Array.isArray(data.sessions) ? data.sessions : [];
+    } else {
+      sess = JSON.parse(storage.get('cs_sessions_' + kidId) || '[]');
+    }
+    return Math.round(sess.filter(s => s.completed).reduce((sum, s) => sum + (s.creditsEarned || 0), 0) * 100) / 100;
+  } catch (e) { return 0; }
 }
 
 // ── Audio ─────────────────────────────────────────────────────────────────────
@@ -983,7 +1046,7 @@ function tickTimers() {
     updateTimerDisplay(cid, t.elapsed, chore);
   });
   if (!anyRunning) stopTimerEngine();
-  saveData();
+  saveDataIfTimerThrottle();
 }
 
 function getTimerState(choreId) {
@@ -1508,8 +1571,8 @@ let pinMode = 'verify';     // 'create-1' | 'create-2' | 'verify'
 let pinFirstEntry = '';
 let pinCallback = null;
 
-function getParentPin() { return localStorage.getItem('cs_parent_pin') || ''; }
-function setParentPin(p) { localStorage.setItem('cs_parent_pin', p); }
+function getParentPin() { return storage.get('cs_parent_pin') || ''; }
+function setParentPin(p) { storage.set('cs_parent_pin', p); }
 
 function openPinGate(callback) {
   pinBuffer = '';
@@ -1868,7 +1931,7 @@ function seedIfEmpty() {
 // ── Kid Management ────────────────────────────────────────────────────────────
 function switchKid(kidId) {
   if (kidId === activeKidId) { closeModal('modal-kid-overlay'); return; }
-  saveData();
+  saveDataNow();
   clearInterval(timerInterval); timerInterval = null;
   activeKidId = kidId;
   saveKids();
@@ -1886,14 +1949,14 @@ function openKidPicker() {
   list.innerHTML = '';
   if (kids.length === 0) { openAddKid(); return; }
   kids.forEach(kid => {
-    const kidWallet = JSON.parse(localStorage.getItem(`cs_wallet_${kid.id}`) || '{"balance":0}');
+    const balance = kid.id === activeKidId ? wallet.balance : getKidBalance(kid.id);
     const card = document.createElement('div');
     card.className = 'kid-picker-card' + (kid.id === activeKidId ? ' active-kid' : '');
     card.innerHTML = `
       <div class="kid-picker-avatar" style="background:${kid.color||'#7C3AED'}22">${kid.emoji}</div>
       <div style="flex:1">
         <div class="kid-picker-name">${kid.name}</div>
-        <div class="kid-picker-balance">🪙 ${fmtCredits(kidWallet.balance)} stars</div>
+        <div class="kid-picker-balance">🪙 ${fmtCredits(balance)} stars</div>
       </div>
       <button class="kid-edit-btn" onclick="event.stopPropagation();openEditKid('${kid.id}')">✏️</button>`;
     card.onclick = () => switchKid(kid.id);
@@ -1975,9 +2038,10 @@ function deleteKid() {
   if (!editingKidId) return;
   const kid = kids.find(k => k.id === editingKidId);
   if (!confirm(`Remove ${kid?.name || 'this kid'} and all their data? This cannot be undone.`)) return;
-  // Remove all their data
+  // Remove all their data (bundled key + legacy keys)
+  storage.remove(kidDataKey(editingKidId));
   ['chores','sessions','wallet','timers'].forEach(k =>
-    localStorage.removeItem(`cs_${k}_${editingKidId}`));
+    storage.remove(`cs_${k}_${editingKidId}`));
   kids = kids.filter(k => k.id !== editingKidId);
   saveKids();
   closeModal('modal-kid-form-overlay');
@@ -1998,7 +2062,7 @@ loadKids();
 // Ensure activeKidId points to a valid kid
 if (!activeKidId || !kids.find(k => k.id === activeKidId)) {
   activeKidId = kids[0]?.id || null;
-  if (activeKidId) localStorage.setItem('cs_active_kid', activeKidId);
+  if (activeKidId) storage.set('cs_active_kid', activeKidId);
 }
 loadData();
 if (activeKidId) {
@@ -2025,7 +2089,7 @@ window.addEventListener('pagehide', () => {
       changed = true;
     }
   });
-  if (changed) saveData();
+  saveDataNow(); // always flush so any debounced save and timer state are persisted
 });
 </script>
 </body>
