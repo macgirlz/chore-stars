@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harper's Word Wizard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+      background: linear-gradient(160deg, #ffecd2, #fcb69f, #a1c4fd);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 14px 8px;
+    }
+
+    /* ── Header ── */
+    .header { text-align: center; margin-bottom: 8px; }
+    h1 {
+      font-size: 1.9rem;
+      color: #fff;
+      text-shadow: 3px 3px 0 #e05fa0, 6px 6px 0 rgba(0,0,0,0.1);
+    }
+    .stars-bar {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; margin-top: 4px; font-size: 1rem; color: #fff; font-weight: bold;
+    }
+    .mute-btn {
+      background: rgba(255,255,255,0.3); border: 2px solid rgba(255,255,255,0.6);
+      border-radius: 50%; width: 32px; height: 32px; font-size: 0.95rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .mute-btn:hover { background: rgba(255,255,255,0.5); }
+
+    /* ── Card ── */
+    .card {
+      background: white; border-radius: 24px; padding: 14px 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.18);
+      width: min(98vw, 520px); text-align: center;
+    }
+
+    /* ── Grade selector ── */
+    .section-label {
+      font-size: 0.7rem; font-weight: bold; color: #aaa;
+      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;
+    }
+    .grade-tabs {
+      display: flex; gap: 4px; flex-wrap: wrap;
+      justify-content: center; margin-bottom: 8px;
+    }
+    .grade-tab {
+      padding: 4px 10px; border: 2px solid transparent; border-radius: 20px;
+      font-family: inherit; font-size: 0.75rem; font-weight: bold;
+      cursor: pointer; transition: all 0.15s; background: #f0f0f0; color: #555;
+    }
+    .grade-tab.active { border-color: #6c5ce7; background: #ede7ff; color: #6c5ce7; transform: scale(1.08); }
+    .grade-tab[data-grade="2"] { background: #b5ead7; color: #2d3436; }
+    .grade-tab[data-grade="3"] { background: #c7f2a4; color: #2d3436; }
+    .grade-tab[data-grade="4"] { background: #ffdac1; color: #2d3436; }
+    .grade-tab[data-grade="5"] { background: #c7ceea; color: #2d3436; }
+    .grade-tab[data-grade="6"] { background: #ffb7b2; color: #2d3436; }
+
+    /* ── Category tabs ── */
+    .cat-tabs {
+      display: flex; gap: 4px; flex-wrap: wrap;
+      justify-content: center; margin-bottom: 10px;
+    }
+    .cat-tab {
+      padding: 3px 9px; border: 2px solid transparent; border-radius: 20px;
+      font-family: inherit; font-size: 0.72rem; font-weight: bold;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .cat-tab.active        { border-color: #6c5ce7; transform: scale(1.08); }
+    .cat-tab[data-cat="all"]      { background: #dfe6e9; color: #2d3436; }
+    .cat-tab[data-cat="animals"]  { background: #b5ead7; color: #2d3436; }
+    .cat-tab[data-cat="food"]     { background: #ffdac1; color: #2d3436; }
+    .cat-tab[data-cat="nature"]   { background: #c7ceea; color: #2d3436; }
+    .cat-tab[data-cat="things"]   { background: #ffb7b2; color: #2d3436; }
+    .cat-tab[data-cat="science"]  { background: #caffbf; color: #2d3436; }
+    .cat-tab[data-cat="social"]   { background: #ffc6ff; color: #2d3436; }
+    .cat-tab[data-cat="language"] { background: #fdffb6; color: #2d3436; }
+
+    /* Progress */
+    .progress-wrap { background: #eee; border-radius: 10px; height: 7px; margin-bottom: 10px; overflow: hidden; }
+    #progress-bar  { height: 100%; background: linear-gradient(90deg,#a29bfe,#fd79a8); border-radius: 10px; transition: width .5s; }
+
+    /* ── Game row ── */
+    .game-row {
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; margin-bottom: 8px;
+    }
+    .emoji-col { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+
+    #category {
+      display: inline-block; background: #a1c4fd; color: #2c3e50;
+      font-size: 0.72rem; font-weight: bold; padding: 2px 10px;
+      border-radius: 20px; text-transform: uppercase; letter-spacing: 1px;
+    }
+    #grade-badge {
+      display: inline-block; background: #6c5ce7; color: white;
+      font-size: 0.68rem; font-weight: bold; padding: 2px 8px;
+      border-radius: 20px;
+    }
+    #emoji {
+      font-size: clamp(56px, 14vw, 85px); line-height: 1;
+      filter: drop-shadow(3px 3px 6px rgba(0,0,0,0.15));
+      animation: bounce 2s infinite;
+    }
+    @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+
+    .say-btn {
+      background: #fdcb6e; border: none; border-radius: 50px;
+      padding: 5px 12px; font-family: inherit; font-size: 0.82rem;
+      font-weight: bold; color: #2d3436; cursor: pointer;
+      box-shadow: 0 3px 0 rgba(0,0,0,0.15);
+      transition: transform .1s, box-shadow .1s;
+      display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;
+    }
+    .say-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,0.15); }
+    .say-btn.speaking { background: #a29bfe; color: white; animation: pulse .6s infinite alternate; }
+    @keyframes pulse { from{opacity:1} to{opacity:0.6} }
+
+    /* ── Hangman ── */
+    #hangman-svg { width: clamp(120px,32vw,170px); height: clamp(120px,32vw,170px); }
+
+    /* Wrong badges */
+    #wrong-badges { display: flex; justify-content: center; gap: 4px; margin-bottom: 7px; }
+    .badge {
+      width: 20px; height: 20px; border-radius: 50%; background: #eee;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem; font-weight: bold; color: #aaa; border: 2px solid #ddd; transition: all .2s;
+    }
+    .badge.wrong { background: #ff7675; color: white; border-color: #d63031; }
+
+    /* ── Word slots ── */
+    #answer-slots {
+      display: flex; justify-content: center; gap: 5px;
+      flex-wrap: wrap; margin-bottom: 8px; min-height: 48px;
+    }
+    .slot {
+      width: clamp(30px,8vw,46px); height: clamp(30px,8vw,46px);
+      border-bottom: 4px solid #ccc; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: clamp(15px,4.5vw,23px); font-weight: bold;
+      color: #2c3e50; background: #f8f9fa; transition: all .2s;
+    }
+    .slot.revealed      { border-color:#00b894; background:#e8fff8; color:#00b894; animation: popLetter .3s ease; }
+    .slot.reveal-answer { border-color:#e17055; background:#fff0ee; color:#e17055; }
+    @keyframes popLetter { 0%{transform:scale(.5)} 70%{transform:scale(1.2)} 100%{transform:scale(1)} }
+
+    /* Hint */
+    #hint-text { font-size: 0.9rem; color: #888; margin-bottom: 7px; min-height: 18px; }
+
+    /* ── Keyboard ── */
+    #keyboard { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; margin-bottom: 10px; }
+    .key {
+      width: clamp(28px,7.5vw,38px); height: clamp(28px,7.5vw,38px);
+      border-radius: 7px; border: none; font-family: inherit;
+      font-size: clamp(12px,3.2vw,16px); font-weight: bold; color: white;
+      cursor: pointer; background: #6c5ce7; box-shadow: 0 3px 0 rgba(0,0,0,0.25);
+      transition: transform .1s, box-shadow .1s, background .15s; user-select: none;
+    }
+    .key:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,0.25); }
+    .key:disabled { cursor: default; }
+    .key.correct { background: #00b894; box-shadow: 0 3px 0 #009975; }
+    .key.wrong   { background: #b2bec3; box-shadow: 0 3px 0 #8a9aa0; opacity: .5; }
+
+    /* ── Buttons ── */
+    .btn-row { display: flex; gap: 7px; justify-content: center; }
+    .btn {
+      padding: 9px 16px; font-size: 0.9rem; font-family: inherit; font-weight: bold;
+      border: none; border-radius: 13px; cursor: pointer;
+      box-shadow: 0 4px 0 rgba(0,0,0,0.2); transition: transform .1s, box-shadow .1s;
+    }
+    .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,0.2); }
+    .btn-hint { background: #fdcb6e; color: #2d3436; }
+    .btn-next { background: #6c5ce7; color: white; display: none; }
+    .btn-skip { background: #b2bec3; color: white; }
+
+    /* ── Feedback ── */
+    #feedback { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; pointer-events:none; z-index:100; }
+    .confetti-piece { position:fixed; border-radius:2px; animation:fall linear forwards; pointer-events:none; }
+    @keyframes fall { 0%{transform:translateY(-20px) rotate(0deg);opacity:1} 100%{transform:translateY(110vh) rotate(720deg);opacity:0} }
+    #well-done { font-size:clamp(2rem,10vw,3.5rem); font-weight:bold; color:#6c5ce7; text-shadow:3px 3px 0 #ffb347; opacity:0; pointer-events:none; }
+    @keyframes popIn { from{transform:scale(.3);opacity:0} to{transform:scale(1);opacity:1} }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-5px)} 60%{transform:translateX(5px)} }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Harper's Word Wizard</h1>
+  <div class="stars-bar">
+    Stars: <span id="star-display">⭐</span> <span id="star-count">0</span>
+    <button class="mute-btn" id="mute-btn" onclick="toggleMute()" title="Toggle sound">🔊</button>
+  </div>
+</div>
+
+<div class="card">
+
+  <!-- Grade selector -->
+  <div class="section-label">Grade Level</div>
+  <div class="grade-tabs">
+    <button class="grade-tab active" data-grade="0"  onclick="setGrade(0)">All</button>
+    <button class="grade-tab"        data-grade="2"  onclick="setGrade(2)">Grade 2</button>
+    <button class="grade-tab"        data-grade="3"  onclick="setGrade(3)">Grade 3</button>
+    <button class="grade-tab"        data-grade="4"  onclick="setGrade(4)">Grade 4</button>
+    <button class="grade-tab"        data-grade="5"  onclick="setGrade(5)">Grade 5</button>
+    <button class="grade-tab"        data-grade="6"  onclick="setGrade(6)">Grade 6</button>
+  </div>
+
+  <!-- Category selector -->
+  <div class="section-label">Category</div>
+  <div class="cat-tabs">
+    <button class="cat-tab active" data-cat="all"      onclick="pickCategory('all')">All</button>
+    <button class="cat-tab"        data-cat="animals"  onclick="pickCategory('animals')">Animals</button>
+    <button class="cat-tab"        data-cat="food"     onclick="pickCategory('food')">Food</button>
+    <button class="cat-tab"        data-cat="nature"   onclick="pickCategory('nature')">Nature</button>
+    <button class="cat-tab"        data-cat="things"   onclick="pickCategory('things')">Things</button>
+    <button class="cat-tab"        data-cat="science"  onclick="pickCategory('science')">Science</button>
+    <button class="cat-tab"        data-cat="social"   onclick="pickCategory('social')">Social</button>
+    <button class="cat-tab"        data-cat="language" onclick="pickCategory('language')">Language</button>
+  </div>
+
+  <div class="progress-wrap"><div id="progress-bar" style="width:0%"></div></div>
+
+  <!-- Emoji + Hangman -->
+  <div class="game-row">
+    <div class="emoji-col">
+      <span id="grade-badge">Grade 2</span>
+      <span id="category">ANIMALS</span>
+      <div id="emoji">🐶</div>
+      <button class="say-btn" id="say-btn" onclick="sayWord()">🔈 Say it</button>
+    </div>
+
+    <div>
+      <svg id="hangman-svg" viewBox="0 0 200 210" xmlns="http://www.w3.org/2000/svg">
+        <!-- Gallows — always visible -->
+        <line x1="10"  y1="200" x2="80"  y2="200" stroke="#a29bfe" stroke-width="6" stroke-linecap="round"/>
+        <line x1="40"  y1="200" x2="40"  y2="20"  stroke="#a29bfe" stroke-width="6" stroke-linecap="round"/>
+        <line x1="40"  y1="20"  x2="140" y2="20"  stroke="#a29bfe" stroke-width="6" stroke-linecap="round"/>
+        <line x1="140" y1="20"  x2="140" y2="50"  stroke="#74b9ff" stroke-width="4" stroke-linecap="round"/>
+        <!-- Part 1: Head -->
+        <g id="hm-head" display="none">
+          <circle cx="140" cy="75" r="26" fill="#ffeaa7" stroke="#fdcb6e" stroke-width="3"/>
+          <g id="face-happy">
+            <circle cx="131" cy="71" r="4" fill="#2d3436"/>
+            <circle cx="149" cy="71" r="4" fill="#2d3436"/>
+            <path d="M129 82 Q140 91 151 82" stroke="#e17055" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          </g>
+          <g id="face-sad" display="none">
+            <path d="M127 69 L135 73" stroke="#2d3436" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M135 69 L127 73" stroke="#2d3436" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M145 69 L153 73" stroke="#2d3436" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M153 69 L145 73" stroke="#2d3436" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M129 88 Q140 81 151 88" stroke="#e17055" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          </g>
+        </g>
+        <!-- Part 2: Body -->
+        <line id="hm-body" x1="140" y1="101" x2="140" y2="155" stroke="#ff6b9d" stroke-width="5" stroke-linecap="round" display="none"/>
+        <!-- Part 3: Left arm -->
+        <line id="hm-larm" x1="140" y1="118" x2="108" y2="140" stroke="#ff9f43" stroke-width="5" stroke-linecap="round" display="none"/>
+        <!-- Part 4: Right arm -->
+        <line id="hm-rarm" x1="140" y1="118" x2="172" y2="140" stroke="#ff9f43" stroke-width="5" stroke-linecap="round" display="none"/>
+        <!-- Part 5: Left leg -->
+        <line id="hm-lleg" x1="140" y1="155" x2="112" y2="190" stroke="#0fbcf9" stroke-width="5" stroke-linecap="round" display="none"/>
+        <!-- Part 6: Right leg -->
+        <line id="hm-rleg" x1="140" y1="155" x2="168" y2="190" stroke="#0fbcf9" stroke-width="5" stroke-linecap="round" display="none"/>
+      </svg>
+    </div>
+  </div>
+
+  <div id="wrong-badges"></div>
+  <div id="answer-slots"></div>
+  <div id="hint-text"></div>
+  <div id="keyboard"></div>
+
+  <div class="btn-row">
+    <button class="btn btn-hint" onclick="showHint()">Hint</button>
+    <button class="btn btn-skip" onclick="nextWord()">Skip</button>
+    <button class="btn btn-next" id="btn-next" onclick="nextWord()">Next Word!</button>
+  </div>
+</div>
+
+<div id="feedback"><div id="well-done" style="display:none"></div></div>
+
+<script>
+// ── Word bank ─────────────────────────────────────────────────────────────────
+// grade: 2=simple 3-4 letter, 3=4-5 letter, 4=5-6 letter, 5=6-7 letter, 6=7-9 letter
+const WORDS = [
+
+  // ── GRADE 2 ── (short, common, everyday words)
+  // Animals
+  {word:"DOG",  emoji:"🐶", hint:"A furry pet that barks!",            cat:"animals", grade:2},
+  {word:"CAT",  emoji:"🐱", hint:"A furry pet that meows!",            cat:"animals", grade:2},
+  {word:"COW",  emoji:"🐮", hint:"It gives us milk on the farm!",      cat:"animals", grade:2},
+  {word:"PIG",  emoji:"🐷", hint:"It loves mud and goes oink!",        cat:"animals", grade:2},
+  {word:"HEN",  emoji:"🐔", hint:"A female chicken!",                   cat:"animals", grade:2},
+  {word:"BEE",  emoji:"🐝", hint:"It makes honey and can sting!",      cat:"animals", grade:2},
+  {word:"ANT",  emoji:"🐜", hint:"A tiny insect that lives in a hill!", cat:"animals", grade:2},
+  {word:"OWL",  emoji:"🦉", hint:"A wise bird that flies at night!",   cat:"animals", grade:2},
+  {word:"FOX",  emoji:"🦊", hint:"A clever orange animal!",            cat:"animals", grade:2},
+  {word:"EMU",  emoji:"🦤", hint:"A very tall bird from Australia!",   cat:"animals", grade:2},
+  {word:"YAK",  emoji:"🐃", hint:"A furry ox that lives in mountains!",cat:"animals", grade:2},
+  {word:"RAM",  emoji:"🐏", hint:"A male sheep with curly horns!",     cat:"animals", grade:2},
+  // Food
+  {word:"EGG",  emoji:"🥚", hint:"Chickens lay these!",                cat:"food", grade:2},
+  {word:"JAM",  emoji:"🍓", hint:"A sweet fruity spread on bread!",    cat:"food", grade:2},
+  {word:"PIE",  emoji:"🥧", hint:"A round baked dish with a crust!",   cat:"food", grade:2},
+  {word:"HAM",  emoji:"🍖", hint:"A pink salty meat from a pig!",      cat:"food", grade:2},
+  {word:"NUT",  emoji:"🥜", hint:"A hard-shelled snack you crack open!",cat:"food", grade:2},
+  {word:"FIG",  emoji:"🍈", hint:"A soft sweet fruit that grows on trees!",cat:"food",grade:2},
+  {word:"OAT",  emoji:"🌾", hint:"A grain used to make porridge!",     cat:"food", grade:2},
+  {word:"PEA",  emoji:"🫛", hint:"A tiny round green vegetable!",      cat:"food", grade:2},
+  {word:"YAM",  emoji:"🍠", hint:"An orange root vegetable!",          cat:"food", grade:2},
+  // Nature
+  {word:"SUN",  emoji:"☀️", hint:"It shines bright in the sky!",      cat:"nature", grade:2},
+  {word:"SKY",  emoji:"🌤️", hint:"The blue space above you!",         cat:"nature", grade:2},
+  {word:"ICE",  emoji:"🧊", hint:"Frozen water!",                      cat:"nature", grade:2},
+  {word:"MUD",  emoji:"🪣", hint:"Wet, sticky earth!",                 cat:"nature", grade:2},
+  {word:"DEW",  emoji:"💧", hint:"Tiny drops of water on grass in the morning!", cat:"nature",grade:2},
+  {word:"LOG",  emoji:"🪵", hint:"A thick piece of cut tree!",         cat:"nature", grade:2},
+  {word:"WEB",  emoji:"🕸️", hint:"A spider spins this to catch bugs!", cat:"nature", grade:2},
+  // Things
+  {word:"BAG",  emoji:"👜", hint:"You carry your things inside it!",   cat:"things", grade:2},
+  {word:"BOX",  emoji:"📦", hint:"A square container for things!",     cat:"things", grade:2},
+  {word:"CUP",  emoji:"☕", hint:"You drink from this!",               cat:"things", grade:2},
+  {word:"HAT",  emoji:"🎩", hint:"You wear it on your head!",          cat:"things", grade:2},
+  {word:"KEY",  emoji:"🔑", hint:"It opens a lock!",                   cat:"things", grade:2},
+  {word:"MAP",  emoji:"🗺️", hint:"It shows you where places are!",    cat:"things", grade:2},
+  {word:"PEN",  emoji:"🖊️", hint:"You write with this!",              cat:"things", grade:2},
+  {word:"TOY",  emoji:"🧸", hint:"A fun thing children play with!",    cat:"things", grade:2},
+  {word:"BED",  emoji:"🛏️", hint:"You sleep on this at night!",       cat:"things", grade:2},
+  {word:"NET",  emoji:"🥅", hint:"A mesh used to catch things!",       cat:"things", grade:2},
+  {word:"POT",  emoji:"🍳", hint:"You cook food in this!",             cat:"things", grade:2},
+  {word:"JAR",  emoji:"🫙", hint:"A glass container with a lid!",      cat:"things", grade:2},
+
+  // ── GRADE 3 ── (4-5 letters, common vocabulary)
+  // Animals
+  {word:"BEAR",   emoji:"🐻", hint:"A big fluffy animal that loves honey!",     cat:"animals", grade:3},
+  {word:"BIRD",   emoji:"🐦", hint:"It has wings and can fly!",                 cat:"animals", grade:3},
+  {word:"CRAB",   emoji:"🦀", hint:"It has claws and walks sideways!",          cat:"animals", grade:3},
+  {word:"DEER",   emoji:"🦌", hint:"It has big antlers!",                       cat:"animals", grade:3},
+  {word:"DUCK",   emoji:"🦆", hint:"It quacks and loves water!",                cat:"animals", grade:3},
+  {word:"FISH",   emoji:"🐟", hint:"It swims in the water!",                    cat:"animals", grade:3},
+  {word:"FROG",   emoji:"🐸", hint:"It jumps and says ribbit!",                 cat:"animals", grade:3},
+  {word:"GOAT",   emoji:"🐐", hint:"It eats grass on the hillside!",            cat:"animals", grade:3},
+  {word:"LION",   emoji:"🦁", hint:"The king of the jungle!",                   cat:"animals", grade:3},
+  {word:"MOLE",   emoji:"🦫", hint:"A furry animal that digs underground!",     cat:"animals", grade:3},
+  {word:"MOTH",   emoji:"🦋", hint:"Like a butterfly, it flies at night!",      cat:"animals", grade:3},
+  {word:"SLUG",   emoji:"🐛", hint:"A slow creature that leaves a slime trail!",cat:"animals", grade:3},
+  {word:"TOAD",   emoji:"🐸", hint:"Like a frog but with bumpy skin!",          cat:"animals", grade:3},
+  {word:"WOLF",   emoji:"🐺", hint:"A wild dog that howls at the moon!",        cat:"animals", grade:3},
+  {word:"WORM",   emoji:"🪱", hint:"It wriggles underground and helps soil!",   cat:"animals", grade:3},
+  {word:"LARK",   emoji:"🐦", hint:"A songbird that sings in the sky!",         cat:"animals", grade:3},
+  {word:"NEWT",   emoji:"🦎", hint:"A small creature that lives near water!",   cat:"animals", grade:3},
+  {word:"SWAN",   emoji:"🦢", hint:"A graceful white bird on lakes!",           cat:"animals", grade:3},
+  {word:"LYNX",   emoji:"🐱", hint:"A wild spotted cat with tufted ears!",      cat:"animals", grade:3},
+  // Food
+  {word:"CAKE",   emoji:"🎂", hint:"You eat this on your birthday!",            cat:"food", grade:3},
+  {word:"CORN",   emoji:"🌽", hint:"A yellow vegetable on a cob!",              cat:"food", grade:3},
+  {word:"MILK",   emoji:"🥛", hint:"A white drink from a cow!",                 cat:"food", grade:3},
+  {word:"RICE",   emoji:"🍚", hint:"Tiny white grains you eat!",                cat:"food", grade:3},
+  {word:"SOUP",   emoji:"🍲", hint:"A warm liquid food!",                       cat:"food", grade:3},
+  {word:"TACO",   emoji:"🌮", hint:"A Mexican food in a folded shell!",         cat:"food", grade:3},
+  {word:"PLUM",   emoji:"🍑", hint:"A small dark-purple fruit!",                cat:"food", grade:3},
+  {word:"PEAR",   emoji:"🍐", hint:"A green fruit shaped like a bell!",         cat:"food", grade:3},
+  {word:"KIWI",   emoji:"🥝", hint:"A fuzzy brown fruit with green inside!",    cat:"food", grade:3},
+  {word:"LIME",   emoji:"🍋", hint:"A small sour green citrus fruit!",          cat:"food", grade:3},
+  {word:"BEET",   emoji:"🫚", hint:"A dark red round vegetable!",               cat:"food", grade:3},
+  {word:"DATE",   emoji:"🌴", hint:"A sweet brown fruit from a palm tree!",     cat:"food", grade:3},
+  // Nature
+  {word:"CAVE",   emoji:"🕳️", hint:"A dark hole inside a mountain!",           cat:"nature", grade:3},
+  {word:"DUNE",   emoji:"🏜️", hint:"A big hill made of sand!",                 cat:"nature", grade:3},
+  {word:"FERN",   emoji:"🌿", hint:"A green leafy plant with no flowers!",      cat:"nature", grade:3},
+  {word:"FIRE",   emoji:"🔥", hint:"It is hot, bright and orange!",             cat:"nature", grade:3},
+  {word:"HAIL",   emoji:"🌨️", hint:"Ice balls that fall from the sky!",        cat:"nature", grade:3},
+  {word:"HILL",   emoji:"⛰️", hint:"A bump in the land, smaller than a mountain!",cat:"nature",grade:3},
+  {word:"LAKE",   emoji:"🏞️", hint:"A large body of still water!",             cat:"nature", grade:3},
+  {word:"LEAF",   emoji:"🍃", hint:"It grows on a tree!",                       cat:"nature", grade:3},
+  {word:"MIST",   emoji:"🌫️", hint:"A thin fog near the ground!",              cat:"nature", grade:3},
+  {word:"MOON",   emoji:"🌙", hint:"It glows in the night sky!",                cat:"nature", grade:3},
+  {word:"RAIN",   emoji:"🌧️", hint:"Water falling from the clouds!",           cat:"nature", grade:3},
+  {word:"REEF",   emoji:"🪸", hint:"A rocky ridge under the sea!",             cat:"nature", grade:3},
+  {word:"ROCK",   emoji:"🪨", hint:"A hard object found on the ground!",        cat:"nature", grade:3},
+  {word:"SAND",   emoji:"🏖️", hint:"Tiny grains found at the beach!",          cat:"nature", grade:3},
+  {word:"SNOW",   emoji:"❄️", hint:"White frozen flakes from the sky!",         cat:"nature", grade:3},
+  {word:"STAR",   emoji:"⭐", hint:"It twinkles high above!",                   cat:"nature", grade:3},
+  {word:"TIDE",   emoji:"🌊", hint:"The rise and fall of sea water!",           cat:"nature", grade:3},
+  {word:"TREE",   emoji:"🌳", hint:"It has roots, a trunk and leaves!",         cat:"nature", grade:3},
+  {word:"VINE",   emoji:"🌿", hint:"A climbing plant that wraps around things!",cat:"nature", grade:3},
+  {word:"WAVE",   emoji:"🌊", hint:"It rises and falls in the ocean!",          cat:"nature", grade:3},
+  {word:"WIND",   emoji:"🌬️", hint:"You can feel it but not see it!",          cat:"nature", grade:3},
+  // Things
+  {word:"BALL",   emoji:"⚽", hint:"You kick or throw this to play!",           cat:"things", grade:3},
+  {word:"BELL",   emoji:"🔔", hint:"You ring it and it goes ding!",             cat:"things", grade:3},
+  {word:"BOAT",   emoji:"⛵", hint:"It floats and sails on water!",             cat:"things", grade:3},
+  {word:"BOOK",   emoji:"📚", hint:"You read stories from it!",                 cat:"things", grade:3},
+  {word:"BOWL",   emoji:"🥣", hint:"A round dish you eat cereal from!",         cat:"things", grade:3},
+  {word:"DRUM",   emoji:"🥁", hint:"You hit it to make music!",                 cat:"things", grade:3},
+  {word:"FLAG",   emoji:"🚩", hint:"It waves in the wind on a pole!",           cat:"things", grade:3},
+  {word:"FORK",   emoji:"🍴", hint:"You use it to pick up food!",               cat:"things", grade:3},
+  {word:"GATE",   emoji:"🚪", hint:"An opening in a fence or wall!",            cat:"things", grade:3},
+  {word:"KITE",   emoji:"🪁", hint:"It flies high in the wind!",                cat:"things", grade:3},
+  {word:"LAMP",   emoji:"💡", hint:"It gives light in a dark room!",            cat:"things", grade:3},
+  {word:"LOCK",   emoji:"🔒", hint:"You need a key to open it!",                cat:"things", grade:3},
+  {word:"MASK",   emoji:"🎭", hint:"It covers your face!",                      cat:"things", grade:3},
+  {word:"NAIL",   emoji:"🔨", hint:"A metal spike you hammer into wood!",       cat:"things", grade:3},
+  {word:"ROPE",   emoji:"🪢", hint:"A long twisted cord used to tie things!",   cat:"things", grade:3},
+  {word:"SAIL",   emoji:"⛵", hint:"A big cloth that catches the wind on a boat!",cat:"things",grade:3},
+  {word:"SHOE",   emoji:"👟", hint:"You wear it on your foot!",                 cat:"things", grade:3},
+  {word:"TENT",   emoji:"⛺", hint:"A shelter you sleep in when camping!",      cat:"things", grade:3},
+  {word:"VASE",   emoji:"🏺", hint:"A tall container for flowers!",             cat:"things", grade:3},
+  {word:"COMB",   emoji:"💈", hint:"You use it to tidy your hair!",             cat:"things", grade:3},
+  {word:"DART",   emoji:"🎯", hint:"A small pointed thing you throw at a board!",cat:"things",grade:3},
+  {word:"SLED",   emoji:"🛷", hint:"You ride this down snowy hills!",           cat:"things", grade:3},
+  {word:"WAND",   emoji:"🪄", hint:"A magic stick used by wizards!",            cat:"things", grade:3},
+
+  // ── GRADE 4 ── (5-6 letters, expanding vocabulary)
+  // Animals
+  {word:"BISON",  emoji:"🦬", hint:"A giant hairy buffalo of North America!", cat:"animals", grade:4},
+  {word:"CRANE",  emoji:"🦅", hint:"A tall bird with long legs and neck!",    cat:"animals", grade:4},
+  {word:"EAGLE",  emoji:"🦅", hint:"A powerful bird of prey with sharp eyes!",cat:"animals", grade:4},
+  {word:"GECKO",  emoji:"🦎", hint:"A small lizard that can climb walls!",    cat:"animals", grade:4},
+  {word:"HIPPO",  emoji:"🦛", hint:"A huge animal that loves river water!",   cat:"animals", grade:4},
+  {word:"HYENA",  emoji:"🐺", hint:"A wild animal known for its laugh!",      cat:"animals", grade:4},
+  {word:"LLAMA",  emoji:"🦙", hint:"A fluffy South American animal like a camel!",cat:"animals",grade:4},
+  {word:"OTTER",  emoji:"🦦", hint:"A furry animal that swims and loves fish!",cat:"animals",grade:4},
+  {word:"RAVEN",  emoji:"🐦‍⬛",hint:"A large all-black bird known for being clever!",cat:"animals",grade:4},
+  {word:"SLOTH",  emoji:"🦥", hint:"The slowest mammal in the world!",        cat:"animals", grade:4},
+  {word:"SQUID",  emoji:"🦑", hint:"A sea creature with ten tentacles!",      cat:"animals", grade:4},
+  {word:"VIPER",  emoji:"🐍", hint:"A venomous snake with a triangular head!",cat:"animals", grade:4},
+  {word:"TAPIR",  emoji:"🐗", hint:"A large animal with a short trunk!",      cat:"animals", grade:4},
+  {word:"SKUNK",  emoji:"🦨", hint:"A black and white animal with a stinky smell!",cat:"animals",grade:4},
+  {word:"QUAIL",  emoji:"🐦", hint:"A small round bird that lives on the ground!",cat:"animals",grade:4},
+  {word:"HERON",  emoji:"🦢", hint:"A tall wading bird with a long beak!",    cat:"animals", grade:4},
+  {word:"FINCH",  emoji:"🐦", hint:"A small colorful songbird!",              cat:"animals", grade:4},
+  {word:"BISON",  emoji:"🦬", hint:"A massive shaggy-haired wild ox!",        cat:"animals", grade:4},
+  {word:"MOOSE",  emoji:"🫎", hint:"The largest member of the deer family!",  cat:"animals", grade:4},
+  // Food
+  {word:"BACON",  emoji:"🥓", hint:"Crispy strips of salted pork!",           cat:"food", grade:4},
+  {word:"BAGEL",  emoji:"🥯", hint:"A round bread with a hole in the middle!",cat:"food", grade:4},
+  {word:"BREAD",  emoji:"🍞", hint:"You put butter and jam on it!",           cat:"food", grade:4},
+  {word:"CANDY",  emoji:"🍬", hint:"A sweet treat!",                          cat:"food", grade:4},
+  {word:"CREAM",  emoji:"🍦", hint:"A thick white dairy product!",            cat:"food", grade:4},
+  {word:"DONUT",  emoji:"🍩", hint:"A ring-shaped fried dough with glaze!",   cat:"food", grade:4},
+  {word:"FUDGE",  emoji:"🍫", hint:"A rich, soft chocolate sweet!",           cat:"food", grade:4},
+  {word:"GRAVY",  emoji:"🍲", hint:"A thick sauce made from meat juices!",    cat:"food", grade:4},
+  {word:"HONEY",  emoji:"🍯", hint:"A golden sweet liquid made by bees!",     cat:"food", grade:4},
+  {word:"JELLY",  emoji:"🫙", hint:"A wobbly sweet spread!",                  cat:"food", grade:4},
+  {word:"JUICE",  emoji:"🧃", hint:"A drink made from fruits!",               cat:"food", grade:4},
+  {word:"LEMON",  emoji:"🍋", hint:"A sour yellow citrus fruit!",             cat:"food", grade:4},
+  {word:"MANGO",  emoji:"🥭", hint:"A sweet tropical fruit!",                 cat:"food", grade:4},
+  {word:"OLIVE",  emoji:"🫒", hint:"A small fruit used to make oil!",         cat:"food", grade:4},
+  {word:"ONION",  emoji:"🧅", hint:"A vegetable that can make you cry!",      cat:"food", grade:4},
+  {word:"PASTA",  emoji:"🍝", hint:"Italian noodles often eaten with sauce!", cat:"food", grade:4},
+  {word:"SALAD",  emoji:"🥗", hint:"A mix of raw vegetables!",                cat:"food", grade:4},
+  {word:"STEAK",  emoji:"🥩", hint:"A thick slice of beef cooked on a grill!",cat:"food", grade:4},
+  {word:"SYRUP",  emoji:"🍁", hint:"A thick sweet liquid poured on pancakes!",cat:"food", grade:4},
+  {word:"TOAST",  emoji:"🍞", hint:"Bread that's been browned in a toaster!", cat:"food", grade:4},
+  {word:"GRAPE",  emoji:"🍇", hint:"Tiny round fruits that grow in clusters!",cat:"food", grade:4},
+  {word:"PEACH",  emoji:"🍑", hint:"A soft, juicy fruit with fuzzy skin!",    cat:"food", grade:4},
+  {word:"APPLE",  emoji:"🍎", hint:"A red or green crunchy fruit!",           cat:"food", grade:4},
+  {word:"PIZZA",  emoji:"🍕", hint:"A round food with cheese and toppings!",  cat:"food", grade:4},
+  {word:"WAFFLE", emoji:"🧇", hint:"A grid-patterned breakfast cake!",        cat:"food", grade:4},
+  {word:"CHERRY", emoji:"🍒", hint:"A tiny round red fruit on a stem!",       cat:"food", grade:4},
+  {word:"COOKIE", emoji:"🍪", hint:"A small round sweet biscuit!",            cat:"food", grade:4},
+  // Nature
+  {word:"CLIFF",  emoji:"🏔️", hint:"A steep rocky face of a mountain!",      cat:"nature", grade:4},
+  {word:"COMET",  emoji:"☄️", hint:"A ball of ice and rock that flies through space!",cat:"nature",grade:4},
+  {word:"DELTA",  emoji:"🌊", hint:"A flat area where a river meets the sea!",cat:"nature", grade:4},
+  {word:"FJORD",  emoji:"🏔️", hint:"A long sea inlet between steep cliffs!",  cat:"nature", grade:4},
+  {word:"FLOOD",  emoji:"🌊", hint:"When water overflows and covers the land!",cat:"nature",grade:4},
+  {word:"FROST",  emoji:"❄️", hint:"A thin layer of ice on cold surfaces!",   cat:"nature", grade:4},
+  {word:"GROVE",  emoji:"🌳", hint:"A small group of trees!",                 cat:"nature", grade:4},
+  {word:"MARSH",  emoji:"🌿", hint:"A wet, low-lying area of land!",          cat:"nature", grade:4},
+  {word:"OCEAN",  emoji:"🌊", hint:"A vast body of salt water!",              cat:"nature", grade:4},
+  {word:"PLAIN",  emoji:"🌾", hint:"A large flat area of land!",              cat:"nature", grade:4},
+  {word:"PLANT",  emoji:"🌱", hint:"A living thing that grows in soil!",      cat:"nature", grade:4},
+  {word:"PRISM",  emoji:"🔷", hint:"A glass shape that splits light into colors!",cat:"nature",grade:4},
+  {word:"RAPID",  emoji:"🌊", hint:"Fast rushing water in a river!",          cat:"nature", grade:4},
+  {word:"SHORE",  emoji:"🏖️", hint:"The land at the edge of the sea!",        cat:"nature", grade:4},
+  {word:"STORM",  emoji:"⛈️", hint:"Wild weather with wind, rain and thunder!",cat:"nature",grade:4},
+  {word:"SWAMP",  emoji:"🌿", hint:"A wet, muddy area filled with plants!",   cat:"nature", grade:4},
+  {word:"VAPOR",  emoji:"💨", hint:"Tiny water droplets floating in the air!",cat:"nature", grade:4},
+  // Things
+  {word:"BENCH",  emoji:"🪑", hint:"A long seat for several people!",         cat:"things", grade:4},
+  {word:"BROOM",  emoji:"🧹", hint:"You use it to sweep the floor!",          cat:"things", grade:4},
+  {word:"BRUSH",  emoji:"🖌️", hint:"You paint or clean with it!",            cat:"things", grade:4},
+  {word:"CHAIR",  emoji:"🪑", hint:"A seat with a back for one person!",      cat:"things", grade:4},
+  {word:"CHEST",  emoji:"🗃️", hint:"A large box to store treasure or clothes!",cat:"things",grade:4},
+  {word:"CLOCK",  emoji:"🕐", hint:"It tells you what time it is!",           cat:"things", grade:4},
+  {word:"CROWN",  emoji:"👑", hint:"A king or queen wears this!",             cat:"things", grade:4},
+  {word:"FLUTE",  emoji:"🎵", hint:"A long thin instrument you blow into!",   cat:"things", grade:4},
+  {word:"GLOBE",  emoji:"🌍", hint:"A round model of planet Earth!",          cat:"things", grade:4},
+  {word:"GLOVE",  emoji:"🧤", hint:"You wear it on your hand!",               cat:"things", grade:4},
+  {word:"HEART",  emoji:"❤️", hint:"A shape that means love!",                cat:"things", grade:4},
+  {word:"HOUSE",  emoji:"🏠", hint:"A place where your family lives!",        cat:"things", grade:4},
+  {word:"KNIFE",  emoji:"🔪", hint:"A sharp tool used to cut food!",          cat:"things", grade:4},
+  {word:"MEDAL",  emoji:"🏅", hint:"You win this in a competition!",          cat:"things", grade:4},
+  {word:"PHONE",  emoji:"📱", hint:"You use it to call and message people!",  cat:"things", grade:4},
+  {word:"PIANO",  emoji:"🎹", hint:"A large keyboard instrument!",            cat:"things", grade:4},
+  {word:"PLANE",  emoji:"✈️", hint:"It flies you to far away places!",        cat:"things", grade:4},
+  {word:"RADAR",  emoji:"📡", hint:"A device that detects distant objects!",  cat:"things", grade:4},
+  {word:"ROBOT",  emoji:"🤖", hint:"A machine that looks like a person!",     cat:"things", grade:4},
+  {word:"SHELF",  emoji:"📚", hint:"A flat board on a wall to store things!", cat:"things", grade:4},
+  {word:"SKATE",  emoji:"⛸️", hint:"A boot with a blade for gliding on ice!", cat:"things",grade:4},
+  {word:"SPOON",  emoji:"🥄", hint:"You eat soup or cereal with this!",       cat:"things", grade:4},
+  {word:"SWORD",  emoji:"⚔️", hint:"A long sharp blade used by knights!",     cat:"things", grade:4},
+  {word:"TABLE",  emoji:"🪵", hint:"A flat surface on four legs to eat at!",  cat:"things", grade:4},
+  {word:"TORCH",  emoji:"🔦", hint:"A light you hold in your hand!",          cat:"things", grade:4},
+  {word:"TRAIN",  emoji:"🚂", hint:"It runs on tracks and carries people!",   cat:"things", grade:4},
+  {word:"TRUCK",  emoji:"🚛", hint:"A big vehicle that carries heavy loads!",  cat:"things", grade:4},
+  {word:"WATCH",  emoji:"⌚", hint:"A small clock you wear on your wrist!",   cat:"things", grade:4},
+  {word:"WHEEL",  emoji:"🎡", hint:"A round thing that rolls!",               cat:"things", grade:4},
+  {word:"PENCIL", emoji:"✏️", hint:"You write and draw with it!",             cat:"things", grade:4},
+  {word:"ROCKET", emoji:"🚀", hint:"It blasts off into outer space!",         cat:"things", grade:4},
+  // Science (grade 4)
+  {word:"FORCE",  emoji:"💪", hint:"A push or pull that moves things!",       cat:"science", grade:4},
+  {word:"LIGHT",  emoji:"💡", hint:"Energy we can see!",                      cat:"science", grade:4},
+  {word:"METAL",  emoji:"⚙️", hint:"A hard shiny material like iron or gold!",cat:"science",grade:4},
+  {word:"ORBIT",  emoji:"🛸", hint:"The curved path a planet takes around the sun!",cat:"science",grade:4},
+  {word:"SOLAR",  emoji:"☀️", hint:"Something that uses energy from the sun!", cat:"science", grade:4},
+  {word:"LUNAR",  emoji:"🌙", hint:"Something related to the Moon!",          cat:"science", grade:4},
+  {word:"BLOOM",  emoji:"🌸", hint:"When a flower opens up!",                 cat:"science", grade:4},
+  {word:"FUNGI",  emoji:"🍄", hint:"The group of living things that includes mushrooms!",cat:"science",grade:4},
+  {word:"LARVA",  emoji:"🐛", hint:"A baby insect before it grows wings!",    cat:"science", grade:4},
+  {word:"SPINE",  emoji:"🦴", hint:"The backbone in your body!",              cat:"science", grade:4},
+  {word:"NERVE",  emoji:"🧠", hint:"A fiber that carries signals in your body!",cat:"science",grade:4},
+
+  // ── GRADE 5 ── (6-7 letters)
+  // Animals
+  {word:"BADGER",  emoji:"🦡", hint:"A black and white burrowing animal!",       cat:"animals", grade:5},
+  {word:"BEAVER",  emoji:"🦫", hint:"A rodent that builds dams in rivers!",      cat:"animals", grade:5},
+  {word:"CONDOR",  emoji:"🦅", hint:"The largest flying bird in the Americas!",  cat:"animals", grade:5},
+  {word:"DONKEY",  emoji:"🫏", hint:"A stubborn animal used to carry loads!",    cat:"animals", grade:5},
+  {word:"FALCON",  emoji:"🦅", hint:"A fast bird of prey that dives steeply!",   cat:"animals", grade:5},
+  {word:"FERRET",  emoji:"🐾", hint:"A long furry pet related to weasels!",      cat:"animals", grade:5},
+  {word:"GIBBON",  emoji:"🐒", hint:"A small ape with very long arms!",          cat:"animals", grade:5},
+  {word:"JAGUAR",  emoji:"🐆", hint:"A spotted wild cat of South America!",      cat:"animals", grade:5},
+  {word:"LIZARD",  emoji:"🦎", hint:"A reptile with scaly skin and four legs!",  cat:"animals", grade:5},
+  {word:"OSPREY",  emoji:"🦅", hint:"A fish-hunting eagle!",                     cat:"animals", grade:5},
+  {word:"PARROT",  emoji:"🦜", hint:"A colorful bird that can mimic speech!",    cat:"animals", grade:5},
+  {word:"PIGEON",  emoji:"🕊️", hint:"A gray bird often seen in cities!",        cat:"animals", grade:5},
+  {word:"PYTHON",  emoji:"🐍", hint:"A very large non-venomous snake!",          cat:"animals", grade:5},
+  {word:"RABBIT",  emoji:"🐰", hint:"A small furry animal with long ears!",      cat:"animals", grade:5},
+  {word:"SALMON",  emoji:"🐟", hint:"A pink fish that swims upstream to breed!", cat:"animals", grade:5},
+  {word:"TOUCAN",  emoji:"🦜", hint:"A tropical bird with a huge colorful beak!",cat:"animals", grade:5},
+  {word:"TURTLE",  emoji:"🐢", hint:"A reptile with a hard shell on its back!",  cat:"animals", grade:5},
+  {word:"WOMBAT",  emoji:"🦘", hint:"A stocky burrowing marsupial from Australia!",cat:"animals",grade:5},
+  {word:"MARMOT",  emoji:"🐿️", hint:"A large ground squirrel that hibernates!",  cat:"animals", grade:5},
+  // Nature
+  {word:"CANYON",  emoji:"🏔️", hint:"A deep valley carved by a river!",         cat:"nature", grade:5},
+  {word:"FOSSIL",  emoji:"🦕", hint:"The remains of an ancient living thing preserved in rock!",cat:"nature",grade:5},
+  {word:"GEYSER",  emoji:"💦", hint:"A spring that shoots hot water into the air!",cat:"nature",grade:5},
+  {word:"ISLAND",  emoji:"🏝️", hint:"A piece of land completely surrounded by water!",cat:"nature",grade:5},
+  {word:"NEBULA",  emoji:"🌌", hint:"A huge cloud of gas and dust in space!",    cat:"nature", grade:5},
+  {word:"POLLEN",  emoji:"🌼", hint:"The fine powder that flowers use to reproduce!",cat:"nature",grade:5},
+  {word:"QUARTZ",  emoji:"💎", hint:"A hard mineral crystal found in rocks!",    cat:"nature", grade:5},
+  {word:"SHADOW",  emoji:"👤", hint:"The dark shape you cast when blocking light!",cat:"nature",grade:5},
+  {word:"SPRING",  emoji:"🌱", hint:"The season when flowers begin to bloom!",   cat:"nature", grade:5},
+  {word:"TUNDRA",  emoji:"🏔️", hint:"A cold flat treeless Arctic landscape!",    cat:"nature", grade:5},
+  {word:"VALLEY",  emoji:"🏞️", hint:"A low area of land between hills!",         cat:"nature", grade:5},
+  {word:"VERTEX",  emoji:"📐", hint:"The highest point or tip of something!",    cat:"nature", grade:5},
+  // Science
+  {word:"CARBON",  emoji:"⚫", hint:"The element found in all living things!",   cat:"science", grade:5},
+  {word:"ENERGY",  emoji:"⚡", hint:"The ability to do work or cause change!",   cat:"science", grade:5},
+  {word:"FUNGUS",  emoji:"🍄", hint:"A living thing like mold or a mushroom!",   cat:"science", grade:5},
+  {word:"GALAXY",  emoji:"🌌", hint:"A huge system of billions of stars!",       cat:"science", grade:5},
+  {word:"INSECT",  emoji:"🐛", hint:"A small creature with six legs!",           cat:"science", grade:5},
+  {word:"MAGNET",  emoji:"🧲", hint:"Something that attracts iron and steel!",   cat:"science", grade:5},
+  {word:"MAMMAL",  emoji:"🐾", hint:"A warm-blooded animal that feeds its young milk!",cat:"science",grade:5},
+  {word:"MIRROR",  emoji:"🪞", hint:"A surface that reflects your image!",       cat:"science", grade:5},
+  {word:"PHOTON",  emoji:"💡", hint:"A tiny particle of light!",                 cat:"science", grade:5},
+  {word:"PLANET",  emoji:"🪐", hint:"A large body orbiting a star!",             cat:"science", grade:5},
+  {word:"REFLEX",  emoji:"⚡", hint:"An automatic body response, like blinking!",cat:"science", grade:5},
+  {word:"VOLUME",  emoji:"📦", hint:"The amount of space something takes up!",   cat:"science", grade:5},
+  {word:"OXYGEN",  emoji:"💨", hint:"The gas we breathe to stay alive!",         cat:"science", grade:5},
+  {word:"PULLEY",  emoji:"⚙️", hint:"A simple machine using a wheel and rope!",  cat:"science", grade:5},
+  // Social Studies
+  {word:"CASTLE",  emoji:"🏰", hint:"A large stone fortress where kings lived!", cat:"social", grade:5},
+  {word:"COLONY",  emoji:"🏘️", hint:"A territory ruled by a distant country!",   cat:"social", grade:5},
+  {word:"DESERT",  emoji:"🏜️", hint:"A hot, dry land with little rainfall!",     cat:"social", grade:5},
+  {word:"EMPIRE",  emoji:"⚔️", hint:"A group of lands ruled by one powerful leader!",cat:"social",grade:5},
+  {word:"FOREST",  emoji:"🌲", hint:"A large area densely covered with trees!",  cat:"social", grade:5},
+  {word:"HARBOR",  emoji:"⚓", hint:"A sheltered place where ships dock!",        cat:"social", grade:5},
+  {word:"JUNGLE",  emoji:"🌴", hint:"A dense tropical forest!",                  cat:"social", grade:5},
+  {word:"MARKET",  emoji:"🏪", hint:"A place where goods are bought and sold!",  cat:"social", grade:5},
+  {word:"MUSEUM",  emoji:"🏛️", hint:"A building where art or history is displayed!",cat:"social",grade:5},
+  {word:"NATION",  emoji:"🌍", hint:"A country with its own government!",         cat:"social", grade:5},
+  {word:"PALACE",  emoji:"🏯", hint:"A grand home for a king or queen!",          cat:"social", grade:5},
+  {word:"TREATY",  emoji:"📜", hint:"A formal agreement between countries!",     cat:"social", grade:5},
+  {word:"VOYAGE",  emoji:"⛵", hint:"A long journey usually by sea!",             cat:"social", grade:5},
+  // Language Arts
+  {word:"ADVERB",  emoji:"📝", hint:"A word that describes a verb (like quickly)!",cat:"language",grade:5},
+  {word:"AUTHOR",  emoji:"✍️", hint:"A person who writes books!",                cat:"language", grade:5},
+  {word:"FABLE",   emoji:"📖", hint:"A short story with a moral lesson, often with animals!",cat:"language",grade:5},
+  {word:"RHYME",   emoji:"🎵", hint:"Words that end with the same sound!",       cat:"language", grade:5},
+  {word:"SIMILE",  emoji:"💬", hint:"A comparison using 'like' or 'as'!",        cat:"language", grade:5},
+  {word:"STANZA",  emoji:"📜", hint:"A group of lines in a poem!",               cat:"language", grade:5},
+  {word:"SPEECH",  emoji:"🎤", hint:"Spoken words delivered to an audience!",    cat:"language", grade:5},
+  {word:"THEME",   emoji:"💭", hint:"The main message or idea of a story!",      cat:"language", grade:5},
+  {word:"GENRE",   emoji:"📚", hint:"A category of literature like mystery or fiction!",cat:"language",grade:5},
+  {word:"POETRY",  emoji:"🎭", hint:"Writing with rhythm and strong feeling!",   cat:"language", grade:5},
+
+  // ── GRADE 6 ── (7-9 letters, academic vocabulary)
+  // Animals
+  {word:"CHEETAH",   emoji:"🐆", hint:"The fastest land animal on Earth!",             cat:"animals", grade:6},
+  {word:"DOLPHIN",   emoji:"🐬", hint:"A highly intelligent ocean mammal!",            cat:"animals", grade:6},
+  {word:"GORILLA",   emoji:"🦍", hint:"The largest of all the apes!",                  cat:"animals", grade:6},
+  {word:"HAMSTER",   emoji:"🐹", hint:"A small furry pet with cheek pouches!",         cat:"animals", grade:6},
+  {word:"LEOPARD",   emoji:"🐆", hint:"A spotted big cat that climbs trees!",          cat:"animals", grade:6},
+  {word:"LOBSTER",   emoji:"🦞", hint:"A red sea creature with big claws!",            cat:"animals", grade:6},
+  {word:"PELICAN",   emoji:"🦩", hint:"A seabird with a huge pouch in its beak!",      cat:"animals", grade:6},
+  {word:"PENGUIN",   emoji:"🐧", hint:"A black and white bird that loves ice!",        cat:"animals", grade:6},
+  {word:"PIRANHA",   emoji:"🐟", hint:"A ferocious freshwater fish with sharp teeth!", cat:"animals", grade:6},
+  {word:"PLATYPUS",  emoji:"🦫", hint:"An egg-laying mammal with a duck-like bill!",   cat:"animals", grade:6},
+  {word:"REINDEER",  emoji:"🦌", hint:"A deer from the Arctic that pulls Santa's sleigh!",cat:"animals",grade:6},
+  {word:"SCORPION",  emoji:"🦂", hint:"A creature with a venomous tail that curves up!",cat:"animals",grade:6},
+  // Nature / Science
+  {word:"ASTEROID",  emoji:"☄️", hint:"A rocky object orbiting the Sun!",              cat:"science", grade:6},
+  {word:"BACTERIA",  emoji:"🦠", hint:"Tiny single-celled living organisms!",          cat:"science", grade:6},
+  {word:"CHEMICAL",  emoji:"🧪", hint:"A substance produced by a reaction!",           cat:"science", grade:6},
+  {word:"CLIMATE",   emoji:"🌡️", hint:"The average weather patterns of a region!",    cat:"science", grade:6},
+  {word:"CRYSTAL",   emoji:"💎", hint:"A solid with a highly ordered atom structure!", cat:"science", grade:6},
+  {word:"DENSITY",   emoji:"⚖️", hint:"How much mass is packed into a given space!",   cat:"science", grade:6},
+  {word:"ECOLOGY",   emoji:"♻️", hint:"The study of how living things interact with their environment!",cat:"science",grade:6},
+  {word:"ELEMENT",   emoji:"⚗️", hint:"A pure substance that cannot be broken down!",  cat:"science", grade:6},
+  {word:"EROSION",   emoji:"🏔️", hint:"The wearing away of rock and soil by water or wind!",cat:"science",grade:6},
+  {word:"GRAVITY",   emoji:"🌍", hint:"The force that pulls objects towards Earth!",   cat:"science", grade:6},
+  {word:"HABITAT",   emoji:"🌿", hint:"The natural environment where an animal lives!",cat:"science", grade:6},
+  {word:"HORIZON",   emoji:"🌅", hint:"The line where the sky meets the Earth!",       cat:"science", grade:6},
+  {word:"MOLECULE",  emoji:"⚗️", hint:"The smallest unit of a chemical compound!",    cat:"science", grade:6},
+  {word:"NITROGEN",  emoji:"💨", hint:"The most common gas in Earth's atmosphere!",   cat:"science", grade:6},
+  {word:"NUCLEUS",   emoji:"⚛️", hint:"The control center of a cell or atom!",        cat:"science", grade:6},
+  {word:"FRICTION",  emoji:"🔥", hint:"The resistance when two surfaces rub together!",cat:"science",grade:6},
+  {word:"PRESSURE",  emoji:"💨", hint:"Force applied over an area!",                  cat:"science", grade:6},
+  {word:"VOLCANO",   emoji:"🌋", hint:"A mountain that erupts with lava!",             cat:"science", grade:6},
+  {word:"HYDROGEN",  emoji:"💧", hint:"The lightest and most abundant element in the universe!",cat:"science",grade:6},
+  {word:"MAGNETIC",  emoji:"🧲", hint:"Having the properties of a magnet!",           cat:"science", grade:6},
+  // Social Studies
+  {word:"ANCIENT",   emoji:"🏛️", hint:"Something belonging to a very long time ago!",  cat:"social", grade:6},
+  {word:"CABINET",   emoji:"🏛️", hint:"A group of senior government ministers!",       cat:"social", grade:6},
+  {word:"CAPITAL",   emoji:"🗺️", hint:"The city that is the seat of government!",     cat:"social", grade:6},
+  {word:"CITIZEN",   emoji:"🪪", hint:"A person who belongs to a country!",            cat:"social", grade:6},
+  {word:"COUNCIL",   emoji:"🏛️", hint:"A group of people elected to govern!",          cat:"social", grade:6},
+  {word:"CULTURE",   emoji:"🎭", hint:"The beliefs, arts and customs of a society!",   cat:"social", grade:6},
+  {word:"DYNASTY",   emoji:"🏯", hint:"A line of rulers from the same family!",        cat:"social", grade:6},
+  {word:"ECONOMY",   emoji:"💰", hint:"The system of money and trade in a country!",  cat:"social", grade:6},
+  {word:"EMPEROR",   emoji:"👑", hint:"The ruler of an empire!",                       cat:"social", grade:6},
+  {word:"FEDERAL",   emoji:"🦅", hint:"Relating to a union of states under one government!",cat:"social",grade:6},
+  {word:"FREEDOM",   emoji:"🕊️", hint:"The power to act, speak or think freely!",     cat:"social", grade:6},
+  {word:"HARVEST",   emoji:"🌾", hint:"The time when crops are gathered from the fields!",cat:"social",grade:6},
+  {word:"KINGDOM",   emoji:"🏰", hint:"A country ruled by a king or queen!",           cat:"social", grade:6},
+  {word:"LIBERTY",   emoji:"🗽", hint:"The state of being free!",                      cat:"social", grade:6},
+  {word:"MIGRATE",   emoji:"🦅", hint:"To move from one place to another!",            cat:"social", grade:6},
+  {word:"PILGRIM",   emoji:"⛵", hint:"A person who travels to a holy place or new land!",cat:"social",grade:6},
+  {word:"POVERTY",   emoji:"😢", hint:"The state of being very poor!",                cat:"social", grade:6},
+  {word:"PROTEST",   emoji:"✊", hint:"To publicly show disagreement!",               cat:"social", grade:6},
+  {word:"PYRAMID",   emoji:"🔺", hint:"A huge ancient triangular monument!",           cat:"social", grade:6},
+  {word:"REPUBLIC",  emoji:"🗽", hint:"A government where people elect their leaders!",cat:"social", grade:6},
+  {word:"SOCIETY",   emoji:"👥", hint:"A community of people living together!",        cat:"social", grade:6},
+  {word:"TRIBUTE",   emoji:"💰", hint:"Payment given to show respect or submission!",  cat:"social", grade:6},
+  {word:"CAVALRY",   emoji:"🐎", hint:"Soldiers who fight on horseback!",              cat:"social", grade:6},
+  {word:"COMMERCE",  emoji:"🏪", hint:"The buying and selling of goods!",              cat:"social", grade:6},
+  // Language Arts
+  {word:"ANTONYM",   emoji:"↔️", hint:"A word opposite in meaning (hot ↔ cold)!",     cat:"language", grade:6},
+  {word:"CHAPTER",   emoji:"📖", hint:"A main division of a book!",                   cat:"language", grade:6},
+  {word:"CONTEXT",   emoji:"💬", hint:"The words around a word that help explain its meaning!",cat:"language",grade:6},
+  {word:"IMAGERY",   emoji:"🎨", hint:"Descriptive language that paints a picture in your mind!",cat:"language",grade:6},
+  {word:"JOURNAL",   emoji:"📓", hint:"A personal diary or record!",                  cat:"language", grade:6},
+  {word:"LITERAL",   emoji:"💬", hint:"Taking words in their basic, exact meaning!",  cat:"language", grade:6},
+  {word:"NARRATE",   emoji:"🗣️", hint:"To tell a story!",                             cat:"language", grade:6},
+  {word:"OPINION",   emoji:"💭", hint:"A personal view that is not a fact!",           cat:"language", grade:6},
+  {word:"PASSAGE",   emoji:"📖", hint:"A section of text from a book!",               cat:"language", grade:6},
+  {word:"PREDICT",   emoji:"🔮", hint:"To guess what will happen next!",              cat:"language", grade:6},
+  {word:"PRONOUN",   emoji:"📝", hint:"A word that replaces a noun (he, she, they)!", cat:"language", grade:6},
+  {word:"SYNONYM",   emoji:"🔄", hint:"A word that means the same as another!",       cat:"language", grade:6},
+  {word:"METAPHOR",  emoji:"💬", hint:"A comparison that says one thing IS another!", cat:"language", grade:6},
+  {word:"DIALOGUE",  emoji:"💬", hint:"A conversation between characters in a story!",cat:"language", grade:6},
+  {word:"NARRATOR",  emoji:"🗣️", hint:"The person or voice telling a story!",         cat:"language", grade:6},
+  {word:"PARAGRAPH", emoji:"📄", hint:"A group of sentences about one idea!",         cat:"language", grade:6},
+];
+
+const MAX_WRONG = 6;
+const HM_PARTS  = ['hm-head','hm-body','hm-larm','hm-rarm','hm-lleg','hm-rleg'];
+const GRADE_NAMES = {0:'All Grades',2:'Grade 2',3:'Grade 3',4:'Grade 4',5:'Grade 5',6:'Grade 6'};
+
+// ── Audio ─────────────────────────────────────────────────────────────────────
+let audioCtx = null, muted = false;
+function getCtx() { if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
+function toggleMute() { muted=!muted; document.getElementById('mute-btn').textContent=muted?'🔇':'🔊'; }
+function playTone(f,type,dur,gain,t0,ctx){const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type=type;o.frequency.setValueAtTime(f,t0);g.gain.setValueAtTime(gain,t0);g.gain.exponentialRampToValueAtTime(0.001,t0+dur);o.start(t0);o.stop(t0+dur);}
+function playClick(){if(muted)return;const ctx=getCtx(),t=ctx.currentTime;playTone(660,'sine',.1,.3,t,ctx);}
+function playWrong(){if(muted)return;const ctx=getCtx(),t=ctx.currentTime;[280,220,170].forEach((f,i)=>playTone(f,'sawtooth',.15,.15,t+i*.13,ctx));}
+function playWin(){if(muted)return;const ctx=getCtx(),t=ctx.currentTime;[523,659,784,1047].forEach((f,i)=>playTone(f,'triangle',.25,.35,t+i*.13,ctx));}
+function playHint(){if(muted)return;const ctx=getCtx(),t=ctx.currentTime;[880,1100].forEach((f,i)=>playTone(f,'sine',.2,.25,t+i*.15,ctx));}
+function playLose(){if(muted)return;const ctx=getCtx(),t=ctx.currentTime;[300,250,200,160].forEach((f,i)=>playTone(f,'sawtooth',.2,.18,t+i*.15,ctx));}
+
+// ── TTS ───────────────────────────────────────────────────────────────────────
+window.speechSynthesis && window.speechSynthesis.getVoices();
+function sayWord(){
+  if(!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const btn=document.getElementById('say-btn');
+  btn.classList.add('speaking'); btn.textContent='🔈 Listening...';
+  const u=new SpeechSynthesisUtterance(currentWord.word.toLowerCase());
+  u.rate=0.75; u.pitch=1.1; u.lang='en-US';
+  const v=window.speechSynthesis.getVoices();
+  const pref=v.find(x=>x.lang==='en-US'&&x.localService)||v.find(x=>x.lang.startsWith('en'));
+  if(pref) u.voice=pref;
+  const reset=()=>{btn.classList.remove('speaking');btn.innerHTML='🔈 Say it';};
+  u.onend=reset; u.onerror=reset;
+  window.speechSynthesis.speak(u);
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let currentWord=null, guessedLetters=new Set(), wrongGuesses=0;
+let hintCount=0, stars=0, wordsPlayed=0;
+let activeCat='all', activeGrade=0;
+let pool=[], poolIndex=0, gameOver=false;
+
+// ── Pool ──────────────────────────────────────────────────────────────────────
+function buildPool(){
+  let src=WORDS.filter(w=>
+    (activeGrade===0 || w.grade===activeGrade) &&
+    (activeCat==='all'  || w.cat===activeCat)
+  );
+  if(src.length===0) src=WORDS; // fallback if filter returns nothing
+  pool=[...src].sort(()=>Math.random()-.5);
+  poolIndex=0;
+}
+
+function setGrade(g){
+  activeGrade=g;
+  document.querySelectorAll('.grade-tab').forEach(t=>t.classList.toggle('active',+t.dataset.grade===g));
+  buildPool(); nextWord(true);
+}
+
+function pickCategory(cat){
+  activeCat=cat;
+  document.querySelectorAll('.cat-tab').forEach(t=>t.classList.toggle('active',t.dataset.cat===cat));
+  buildPool(); nextWord(true);
+}
+
+// ── Game flow ─────────────────────────────────────────────────────────────────
+function init(){ buildPool(); loadWord(); }
+
+function nextWord(reset){
+  if(reset) wordsPlayed=0;
+  hintCount=0;
+  document.getElementById('btn-next').style.display='none';
+  loadWord();
+}
+
+function loadWord(){
+  if(poolIndex>=pool.length) buildPool();
+  currentWord=pool[poolIndex++];
+  guessedLetters=new Set(); wrongGuesses=0; gameOver=false; hintCount=0;
+  wordsPlayed++;
+  updateProgress();
+  render();
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function render(){
+  document.getElementById('category').textContent=currentWord.cat.toUpperCase();
+  document.getElementById('emoji').textContent=currentWord.emoji;
+  document.getElementById('grade-badge').textContent=GRADE_NAMES[currentWord.grade]||'';
+  document.getElementById('hint-text').textContent='';
+  const sb=document.getElementById('say-btn');
+  sb.classList.remove('speaking'); sb.innerHTML='🔈 Say it';
+  renderHangman(); renderBadges(); renderSlots(); renderKeyboard();
+  setTimeout(sayWord,600);
+}
+
+function renderHangman(){
+  HM_PARTS.forEach(id=>document.getElementById(id).setAttribute('display','none'));
+  document.getElementById('face-happy').setAttribute('display','inline');
+  document.getElementById('face-sad').setAttribute('display','none');
+}
+
+function renderBadges(){
+  const wrap=document.getElementById('wrong-badges'); wrap.innerHTML='';
+  for(let i=0;i<MAX_WRONG;i++){
+    const b=document.createElement('div');
+    b.className='badge'+(i<wrongGuesses?' wrong':'');
+    b.textContent=i<wrongGuesses?'✗':(i+1);
+    wrap.appendChild(b);
+  }
+}
+
+function renderSlots(){
+  const c=document.getElementById('answer-slots'); c.innerHTML='';
+  for(const letter of currentWord.word){
+    const slot=document.createElement('div');
+    const revealed=guessedLetters.has(letter);
+    slot.className='slot'+(revealed?' revealed':'');
+    slot.textContent=revealed?letter:'';
+    c.appendChild(slot);
+  }
+}
+
+function renderKeyboard(){
+  const kb=document.getElementById('keyboard'); kb.innerHTML='';
+  for(let i=0;i<26;i++){
+    const letter=String.fromCharCode(65+i);
+    const btn=document.createElement('button');
+    btn.className='key'; btn.textContent=letter;
+    const inWord=currentWord.word.includes(letter);
+    const guessed=guessedLetters.has(letter);
+    if(guessed){ btn.classList.add(inWord?'correct':'wrong'); btn.disabled=true; }
+    btn.addEventListener('click',()=>guess(letter));
+    kb.appendChild(btn);
+  }
+}
+
+// ── Guess ─────────────────────────────────────────────────────────────────────
+function guess(letter){
+  if(gameOver||guessedLetters.has(letter)) return;
+  guessedLetters.add(letter);
+  const inWord=currentWord.word.includes(letter);
+  if(inWord){
+    playClick();
+    const slots=document.querySelectorAll('.slot');
+    currentWord.word.split('').forEach((l,i)=>{
+      if(l===letter){
+        slots[i].className='slot revealed'; slots[i].textContent=l;
+        slots[i].style.animation='none'; void slots[i].offsetWidth;
+        slots[i].style.animation='popLetter .3s ease';
+      }
+    });
+  } else {
+    wrongGuesses++;
+    playWrong();
+    const part=document.getElementById(HM_PARTS[wrongGuesses-1]);
+    if(part){ part.setAttribute('display','inline');
+      const svg=document.getElementById('hangman-svg');
+      svg.style.animation='none'; void svg.offsetWidth; svg.style.animation='shake .3s ease';
+    }
+    renderBadges();
+  }
+  const keys=document.querySelectorAll('.key');
+  keys.forEach(k=>{ if(k.textContent===letter){ k.classList.add(inWord?'correct':'wrong'); k.disabled=true; }});
+  checkGameState();
+}
+
+function checkGameState(){
+  const allRevealed=currentWord.word.split('').every(l=>guessedLetters.has(l));
+  if(allRevealed){
+    gameOver=true;
+    document.getElementById('hint-text').textContent='Amazing! You got it! 🎉';
+    document.getElementById('hint-text').style.color='#00b894';
+    playWin(); earnStars(); showWellDone(); launchConfetti();
+    document.getElementById('btn-next').style.display='inline-block';
+    disableKeyboard();
+  } else if(wrongGuesses>=MAX_WRONG){
+    gameOver=true;
+    document.getElementById('face-happy').setAttribute('display','none');
+    document.getElementById('face-sad').setAttribute('display','inline');
+    const slots=document.querySelectorAll('.slot');
+    currentWord.word.split('').forEach((l,i)=>{
+      if(!guessedLetters.has(l)){ slots[i].className='slot reveal-answer'; slots[i].textContent=l; }
+    });
+    document.getElementById('hint-text').textContent=`The word was: ${currentWord.word}`;
+    document.getElementById('hint-text').style.color='#e17055';
+    playLose();
+    document.getElementById('btn-next').style.display='inline-block';
+    disableKeyboard();
+  }
+}
+
+function disableKeyboard(){ document.querySelectorAll('.key').forEach(k=>k.disabled=true); }
+
+// ── Hint ──────────────────────────────────────────────────────────────────────
+function showHint(){
+  if(gameOver) return;
+  hintCount++; playHint();
+  if(hintCount===1){
+    document.getElementById('hint-text').textContent=currentWord.hint;
+    document.getElementById('hint-text').style.color='#888';
+  } else {
+    const unguessed=[...new Set(currentWord.word.split(''))].filter(l=>!guessedLetters.has(l));
+    if(unguessed.length>0) guess(unguessed[Math.floor(Math.random()*unguessed.length)]);
+  }
+}
+
+// ── Stars & Progress ──────────────────────────────────────────────────────────
+function earnStars(){
+  const earned=Math.max(1,3-Math.floor(wrongGuesses/2)-hintCount);
+  stars+=earned;
+  document.getElementById('star-count').textContent=stars;
+  document.getElementById('star-display').textContent='⭐'.repeat(Math.min(earned,3));
+}
+function updateProgress(){
+  document.getElementById('progress-bar').style.width=Math.min(100,(wordsPlayed/10)*100)+'%';
+}
+
+// ── Celebrations ──────────────────────────────────────────────────────────────
+function showWellDone(){
+  const msgs=['Well Done!','Amazing!','You Rock!','Brilliant!','Super Star!','Wonderful!','Fantastic!'];
+  const el=document.getElementById('well-done');
+  el.textContent=msgs[~~(Math.random()*msgs.length)];
+  el.style.display='block'; el.style.animation='none';
+  void el.offsetWidth; el.style.animation='popIn .4s cubic-bezier(.175,.885,.32,1.275) forwards';
+  setTimeout(()=>{ el.style.display='none'; },1800);
+}
+function launchConfetti(){
+  const colors=['#ff6b9d','#ffb347','#ffd32a','#0be881','#0fbcf9','#a29bfe','#f53b57'];
+  for(let i=0;i<60;i++){
+    const p=document.createElement('div');
+    p.className='confetti-piece';
+    p.style.cssText=`left:${Math.random()*100}vw;top:-20px;background:${colors[~~(Math.random()*colors.length)]};border-radius:${Math.random()>.5?'50%':'2px'};width:${8+Math.random()*10}px;height:${8+Math.random()*10}px;animation-duration:${1.5+Math.random()*2}s;animation-delay:${Math.random()*.5}s`;
+    document.getElementById('feedback').appendChild(p);
+    p.addEventListener('animationend',()=>p.remove());
+  }
+}
+
+// ── Keyboard shortcut ─────────────────────────────────────────────────────────
+document.addEventListener('keydown',e=>{
+  const l=e.key.toUpperCase();
+  if(l.length===1&&l>='A'&&l<='Z') guess(l);
+});
+
+// ── Shake animation ───────────────────────────────────────────────────────────
+const s=document.createElement('style');
+s.textContent='@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}60%{transform:translateX(5px)}}';
+document.head.appendChild(s);
+
+init();
+</script>
+</body>
+</html>

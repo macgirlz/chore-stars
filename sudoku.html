@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harper's Sudoku</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+      background: linear-gradient(135deg, #a8edea, #fed6e3);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      color: #ff6b9d;
+      text-shadow: 3px 3px 0px #ffb347;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    .game-container {
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    }
+
+    /* Sudoku Grid */
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(9, 1fr);
+      border: 4px solid #333;
+      border-radius: 8px;
+      overflow: hidden;
+      width: min(90vw, 450px);
+      height: min(90vw, 450px);
+    }
+
+    .cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(14px, 4vw, 26px);
+      font-weight: bold;
+      cursor: pointer;
+      border: 1px solid #ccc;
+      transition: background 0.15s;
+      user-select: none;
+      aspect-ratio: 1;
+      position: relative;
+    }
+
+    /* Thick borders for 3x3 boxes */
+    .cell[data-col="3"], .cell[data-col="6"] { border-left: 3px solid #333; }
+    .cell[data-row="3"], .cell[data-row="6"] { border-top: 3px solid #333; }
+
+    .cell.given {
+      background: #f0f0f0;
+      color: #333;
+      cursor: default;
+    }
+
+    .cell.selected {
+      background: #ffd6f0 !important;
+    }
+
+    .cell.highlighted {
+      background: #fff0f8;
+    }
+
+    .cell.user-input {
+      color: #3a86ff;
+    }
+
+    .cell.error {
+      color: #ff3a3a !important;
+      background: #ffe0e0 !important;
+    }
+
+    .cell.correct {
+      color: #2ecc71 !important;
+    }
+
+    .cell:hover:not(.given) {
+      background: #ffe8f5;
+    }
+
+    /* Notes grid inside a cell */
+    .cell-notes {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      width: 100%;
+      height: 100%;
+      padding: 1px;
+    }
+
+    .note-digit {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(5px, 1.1vw, 9px);
+      font-weight: normal;
+      color: #7c6aff;
+      line-height: 1;
+    }
+
+    /* Number Pad */
+    #numpad {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-top: 16px;
+      width: min(90vw, 450px);
+    }
+
+    .num-btn {
+      padding: 12px 0;
+      font-size: 1.4rem;
+      font-family: inherit;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.1s;
+      box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+    }
+
+    .num-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 rgba(0,0,0,0.2);
+    }
+
+    .num-btn[data-num="1"] { background: #ff9aa2; color: white; }
+    .num-btn[data-num="2"] { background: #ffb347; color: white; }
+    .num-btn[data-num="3"] { background: #fffb69; color: #555; }
+    .num-btn[data-num="4"] { background: #b5ead7; color: #333; }
+    .num-btn[data-num="5"] { background: #c7ceea; color: #333; }
+    .num-btn[data-num="6"] { background: #ff6b9d; color: white; }
+    .num-btn[data-num="7"] { background: #a29bfe; color: white; }
+    .num-btn[data-num="8"] { background: #74b9ff; color: white; }
+    .num-btn[data-num="9"] { background: #55efc4; color: #333; }
+    .num-btn[data-num="0"] { background: #dfe6e9; color: #555; font-size: 1rem; }
+
+    /* Notes mode toggle */
+    .mode-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      width: min(90vw, 450px);
+    }
+
+    .btn-notes-toggle {
+      flex: 1;
+      padding: 10px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      font-weight: bold;
+      border: 3px solid transparent;
+      border-radius: 12px;
+      cursor: pointer;
+      background: #dfe6e9;
+      color: #555;
+      transition: all 0.15s;
+      box-shadow: 0 4px 0 rgba(0,0,0,0.15);
+    }
+
+    .btn-notes-toggle.active {
+      background: #a29bfe;
+      color: white;
+      border-color: #6c5ce7;
+      box-shadow: 0 4px 0 rgba(108,92,231,0.4);
+    }
+
+    .btn-notes-toggle:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 rgba(0,0,0,0.15);
+    }
+
+    /* Buttons */
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      justify-content: center;
+      width: min(90vw, 450px);
+    }
+
+    .btn {
+      flex: 1;
+      padding: 12px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      font-weight: bold;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+      transition: transform 0.1s, box-shadow 0.1s, opacity 0.2s;
+    }
+
+    .btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 rgba(0,0,0,0.2);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.1);
+    }
+
+    .btn-check  { background: #6c5ce7; color: white; }
+    .btn-new    { background: #00b894; color: white; }
+    .btn-hint   { background: #fdcb6e; color: #333; }
+
+    /* Difficulty selector */
+    .difficulty {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      justify-content: center;
+    }
+
+    .diff-btn {
+      padding: 6px 16px;
+      border: 3px solid transparent;
+      border-radius: 20px;
+      font-family: inherit;
+      font-weight: bold;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .diff-btn.easy   { background: #b5ead7; color: #333; }
+    .diff-btn.medium { background: #ffb347; color: white; }
+    .diff-btn.hard   { background: #ff6b9d; color: white; }
+    .diff-btn.active { border-color: #333; transform: scale(1.05); }
+
+    /* Message */
+    #message {
+      min-height: 36px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 12px;
+      color: #6c5ce7;
+    }
+
+    /* Stars animation */
+    @keyframes pop {
+      0%   { transform: scale(0); opacity: 0; }
+      60%  { transform: scale(1.3); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .star { display: inline-block; animation: pop 0.4s ease forwards; }
+  </style>
+</head>
+<body>
+
+<h1>Harper's Sudoku</h1>
+<p class="subtitle">Fill every row, column and box with numbers 1-9</p>
+
+<div class="game-container">
+  <div class="difficulty">
+    <button class="diff-btn easy active" onclick="setDifficulty('easy')">Easy</button>
+    <button class="diff-btn medium" onclick="setDifficulty('medium')">Medium</button>
+    <button class="diff-btn hard" onclick="setDifficulty('hard')">Hard</button>
+  </div>
+
+  <div id="grid"></div>
+
+  <div id="numpad"></div>
+
+  <div class="mode-row">
+    <button id="notes-toggle" class="btn-notes-toggle" onclick="toggleNotesMode()">✏️ Notes: OFF</button>
+  </div>
+
+  <div class="btn-row">
+    <button id="hint-btn" class="btn btn-hint" onclick="giveHint()">💡 Hint</button>
+    <button class="btn btn-check" onclick="checkBoard()">Check</button>
+    <button class="btn btn-new"   onclick="newGame()">New Game</button>
+  </div>
+
+  <div id="message"></div>
+</div>
+
+<script>
+// ── Puzzle bank ─────────────────────────────────────────────────────────────
+const PUZZLES = {
+  easy: [
+    {
+      puzzle:   "530070000600195000098000060800060003400803001700020006060000280000419005000080079",
+      solution: "534678912672195348198342567859761423426853791713924856961537284287419635345286179"
+    },
+    {
+      puzzle:   "003020600900305001001806400008102900700000008006708200002609500800203009005010300",
+      solution: "483921657967345821251876493548132976729564138136798245372689514814253769695417382"
+    },
+    {
+      puzzle:   "200080300060070084030500209000105408000000000402706000301007040720040060004010003",
+      solution: "245981376169273584837564219976125438518349762423786951391657842752498163684312795"
+    },
+  ],
+  medium: [
+    {
+      puzzle:   "010020300004005060070000008006900070000800000090006400500000010080700900007080050",
+      solution: "815427396234895761679143528456912873123874645798356412561239187382761954947685230"
+    },
+    {
+      puzzle:   "000000907000420180000705026100904000050000040000507009920108000034059000507000000",
+      solution: "162834957795426183843715326138964275659273841274587639921348764436159782587642319"
+    },
+  ],
+  hard: [
+    {
+      puzzle:   "800000000003600000070090200060005030004010700090100006006000028000900070000500009",
+      solution: "812753649943682175675491283469325831284167956397148526521934768138276494756819392"
+    },
+    {
+      puzzle:   "000006080080040007700000005000800030041000690060003000900000002500090060030200000",
+      solution: "495316782182749357736582145257864931841235698369173824914657423578921466023498571"
+    },
+  ]
+};
+
+// Hint limits per difficulty
+const MAX_HINTS = { easy: 5, medium: 3, hard: 1 };
+
+// ── State ────────────────────────────────────────────────────────────────────
+let board      = Array(81).fill(0);
+let given      = Array(81).fill(false);
+let solution   = Array(81).fill(0);
+let notes      = Array.from({length: 81}, () => new Set());
+let selected   = -1;
+let difficulty = 'easy';
+let notesMode  = false;
+let hintsUsed  = 0;
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+function setDifficulty(d) {
+  difficulty = d;
+  document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.diff-btn.' + d).classList.add('active');
+  newGame();
+}
+
+function newGame() {
+  const bank = PUZZLES[difficulty];
+  const pick = bank[Math.floor(Math.random() * bank.length)];
+
+  board    = pick.puzzle.split('').map(Number);
+  solution = pick.solution.split('').map(Number);
+  given    = board.map(v => v !== 0);
+  notes    = Array.from({length: 81}, () => new Set());
+  selected = -1;
+  hintsUsed = 0;
+  notesMode = false;
+
+  document.getElementById('message').innerHTML = '';
+  document.getElementById('notes-toggle').textContent = '✏️ Notes: OFF';
+  document.getElementById('notes-toggle').classList.remove('active');
+  updateHintButton();
+  renderGrid();
+}
+
+// ── Render ───────────────────────────────────────────────────────────────────
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+
+  for (let i = 0; i < 81; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'cell' + (given[i] ? ' given' : '');
+    cell.dataset.index = i;
+    cell.dataset.row = Math.floor(i / 9);
+    cell.dataset.col = i % 9;
+    cell.addEventListener('click', () => selectCell(i));
+    setCellContent(cell, i);
+    grid.appendChild(cell);
+  }
+
+  buildNumpad();
+}
+
+function setCellContent(cell, i) {
+  if (board[i] !== 0) {
+    cell.textContent = board[i];
+  } else if (notes[i].size > 0) {
+    // Show pencil notes as a 3×3 mini-grid
+    const grid = document.createElement('div');
+    grid.className = 'cell-notes';
+    for (let n = 1; n <= 9; n++) {
+      const span = document.createElement('span');
+      span.className = 'note-digit';
+      span.textContent = notes[i].has(n) ? n : '';
+      grid.appendChild(span);
+    }
+    cell.textContent = '';
+    cell.appendChild(grid);
+  } else {
+    cell.textContent = '';
+  }
+}
+
+function buildNumpad() {
+  const pad = document.getElementById('numpad');
+  pad.innerHTML = '';
+  for (let n = 1; n <= 9; n++) {
+    const btn = document.createElement('button');
+    btn.className = 'num-btn';
+    btn.dataset.num = n;
+    btn.textContent = n;
+    btn.addEventListener('click', () => inputNumber(n));
+    pad.appendChild(btn);
+  }
+  const erase = document.createElement('button');
+  erase.className = 'num-btn';
+  erase.dataset.num = 0;
+  erase.textContent = 'Erase';
+  erase.addEventListener('click', () => inputNumber(0));
+  pad.appendChild(erase);
+}
+
+function updateHintButton() {
+  const btn = document.getElementById('hint-btn');
+  const max = MAX_HINTS[difficulty];
+  const left = max - hintsUsed;
+  if (left <= 0) {
+    btn.textContent = '💡 No Hints';
+    btn.disabled = true;
+  } else {
+    btn.textContent = `💡 Hint (${left}/${max})`;
+    btn.disabled = false;
+  }
+}
+
+// ── Interaction ──────────────────────────────────────────────────────────────
+function selectCell(idx) {
+  selected = idx;
+  highlightCells(idx);
+}
+
+function highlightCells(idx) {
+  const cells = document.querySelectorAll('.cell');
+  const row = Math.floor(idx / 9);
+  const col = idx % 9;
+  const boxR = Math.floor(row / 3) * 3;
+  const boxC = Math.floor(col / 3) * 3;
+
+  cells.forEach(c => {
+    c.classList.remove('selected', 'highlighted', 'error', 'correct');
+    const i = +c.dataset.index;
+    const r = Math.floor(i / 9);
+    const cl = i % 9;
+    if (i === idx) {
+      c.classList.add('selected');
+    } else if (r === row || cl === col ||
+      (r >= boxR && r < boxR + 3 && cl >= boxC && cl < boxC + 3)) {
+      c.classList.add('highlighted');
+    }
+    setCellContent(c, i);
+  });
+}
+
+function inputNumber(n) {
+  if (selected < 0 || given[selected]) return;
+
+  if (notesMode && n !== 0) {
+    // Toggle note
+    if (board[selected] !== 0) return; // cell already has a confirmed number
+    if (notes[selected].has(n)) {
+      notes[selected].delete(n);
+    } else {
+      notes[selected].add(n);
+    }
+    highlightCells(selected);
+    return;
+  }
+
+  // Normal mode: set confirmed number and clear notes for this cell
+  board[selected] = n;
+  notes[selected].clear();
+  highlightCells(selected);
+  document.getElementById('message').innerHTML = '';
+
+  if (board.every(v => v !== 0)) checkBoard();
+}
+
+function toggleNotesMode() {
+  notesMode = !notesMode;
+  const btn = document.getElementById('notes-toggle');
+  btn.textContent = notesMode ? '✏️ Notes: ON' : '✏️ Notes: OFF';
+  btn.classList.toggle('active', notesMode);
+}
+
+// Keyboard support
+document.addEventListener('keydown', e => {
+  if (selected < 0) return;
+  if (e.key >= '1' && e.key <= '9') inputNumber(+e.key);
+  if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0') inputNumber(0);
+  if (e.key === 'n' || e.key === 'N') toggleNotesMode();
+
+  const moves = { ArrowUp: -9, ArrowDown: 9, ArrowLeft: -1, ArrowRight: 1 };
+  if (moves[e.key] !== undefined) {
+    e.preventDefault();
+    const next = selected + moves[e.key];
+    if (next >= 0 && next < 81) selectCell(next);
+  }
+});
+
+// ── Check ────────────────────────────────────────────────────────────────────
+function checkBoard() {
+  const cells = document.querySelectorAll('.cell');
+  let errors = 0, filled = 0;
+
+  cells.forEach(c => {
+    c.classList.remove('error', 'correct');
+    const i = +c.dataset.index;
+    if (board[i] === 0) return;
+    filled++;
+    if (board[i] === solution[i]) {
+      if (!given[i]) c.classList.add('correct');
+    } else if (!given[i]) {
+      c.classList.add('error');
+      errors++;
+    }
+  });
+
+  const msg = document.getElementById('message');
+  if (errors > 0) {
+    msg.innerHTML = `Oops! ${errors} mistake${errors > 1 ? 's' : ''}. Keep trying!`;
+    msg.style.color = '#e17055';
+  } else if (filled === 81) {
+    msg.innerHTML = '<span class="star">⭐</span> <span class="star" style="animation-delay:0.1s">You did it!</span> <span class="star" style="animation-delay:0.2s">⭐</span>';
+    msg.style.color = '#6c5ce7';
+  } else {
+    msg.innerHTML = 'Looking good so far! Keep going!';
+    msg.style.color = '#00b894';
+  }
+}
+
+// ── Hint ─────────────────────────────────────────────────────────────────────
+function giveHint() {
+  const max = MAX_HINTS[difficulty];
+  if (hintsUsed >= max) return;
+
+  let empties = [];
+  for (let i = 0; i < 81; i++) {
+    if (!given[i] && board[i] !== solution[i]) empties.push(i);
+  }
+  if (empties.length === 0) return;
+
+  const pick = empties[Math.floor(Math.random() * empties.length)];
+  board[pick] = solution[pick];
+  notes[pick].clear();
+  given[pick] = true;
+  hintsUsed++;
+
+  updateHintButton();
+  selectCell(pick);
+
+  const left = max - hintsUsed;
+  const msg = document.getElementById('message');
+  msg.innerHTML = left > 0 ? `Here's a hint! (${left} left)` : "That was your last hint!";
+  msg.style.color = '#fdcb6e';
+}
+
+// ── Start ────────────────────────────────────────────────────────────────────
+newGame();
+</script>
+</body>
+</html>
