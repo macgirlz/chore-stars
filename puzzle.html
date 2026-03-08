@@ -565,10 +565,35 @@ const THEMES = [
     svgs: [
       'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Volkswagen_Beetle_A5_Yellow_Rush_%281%29.jpg/1280px-Volkswagen_Beetle_A5_Yellow_Rush_%281%29.jpg',
       'https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/2019_Formula_One_tests_Barcelona%2C_Stroll_%2847209286722%29.jpg/1280px-2019_Formula_One_tests_Barcelona%2C_Stroll_%2847209286722%29.jpg',
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/1931_Alfa_Romeo_8C_2300_Touring_Spider_-_Flickr_-_exfordy.jpg/1280px-1931_Alfa_Romeo_8C_2300_Touring_Spider_-_Flickr_-_exfordy.jpg',
+      buildAlfaRomeoSVG(),
       'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/2011_Lamborghini_Aventador_%285488708288%29.jpg/1280px-2011_Lamborghini_Aventador_%285488708288%29.jpg'
     ],
-    svgLabels: ['VW Beetle', 'F1 — Racing Point', '1931 Alfa Romeo\n8C Spider', 'Lamborghini\nAventador']
+    svgLabels: ['VW Beetle', 'F1 — Racing Point', 'Alfa Romeo\nReady to Race!', 'Lamborghini\nAventador']
+  },
+  {
+    id: 'photos',
+    name: 'Photos',
+    emoji: '📷',
+    gradient: 'linear-gradient(135deg,#6366f1,#8b5cf6)',
+    facts: [
+      '📸 The first photograph ever taken needed 8 hours of exposure — the subject had to sit still all day!',
+      '🌈 Cameras can capture colors we can\'t even see — like ultraviolet light on flowers that bees see!',
+      '👶 Baby photos help us remember our earliest days — scientists say we form memories from around age 3.',
+      '🌍 There are over 1 trillion photos taken every year around the world. That\'s more than 3 billion per day!',
+      '📱 The first camera phone was made in 2000 — it could only take a picture with 0.1 megapixels!',
+      '🖼️ School picture day has been a tradition for over 100 years — families love to see how we grow each year!',
+      '✨ Smiling in photos actually makes you feel happier — your brain connects the smile to good feelings!',
+      '🦋 A single photo can freeze a moment forever — that\'s why we love looking back at old pictures!',
+      '📷 The word "photograph" means "drawing with light" in Greek — photos are made entirely from light!',
+      '🌟 Stars in the sky are so far away that when we take a photo of them, we\'re actually seeing the past!',
+      '🎂 Birthday photos help us remember every candle we blew out and every cake we shared with friends!',
+      '🏠 Family photos tell the story of our lives — each one is a little piece of history to keep forever.'
+    ],
+    svgs: [
+      'puzzle-images/photos/harrison.jpg',
+      'puzzle-images/photos/thailand-2025-05-29_395.jpg'
+    ],
+    svgLabels: ['Harrison', 'Thailand']
   },
   {
     id: 'cartoons',
@@ -1574,6 +1599,135 @@ function buildVintageCarSVG() {
 </svg>`;}
 */
 
+function buildAlfaRomeoSVG() {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+  <defs>
+    <linearGradient id="alfaSky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#87CEEB"/>
+      <stop offset="60%" stop-color="#B0E0E6"/>
+      <stop offset="100%" stop-color="#98D8AA"/>
+    </linearGradient>
+    <linearGradient id="alfaTrack" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4A4A4A"/>
+      <stop offset="100%" stop-color="#2D2D2D"/>
+    </linearGradient>
+    <linearGradient id="alfaTrackStripes" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="50%" stop-color="#FFFFFF"/>
+      <stop offset="50%" stop-color="transparent"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </linearGradient>
+    <linearGradient id="alfaCarRed" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FF6B6B"/>
+      <stop offset="50%" stop-color="#EE5A5A"/>
+      <stop offset="100%" stop-color="#C0392B"/>
+    </linearGradient>
+    <linearGradient id="alfaWheel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2C3E50"/>
+      <stop offset="100%" stop-color="#1a252f"/>
+    </linearGradient>
+    <radialGradient id="alfaSun" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFE066"/>
+      <stop offset="70%" stop-color="#FFD93D"/>
+      <stop offset="100%" stop-color="#F4B942" stop-opacity="0.8"/>
+    </radialGradient>
+  </defs>
+  <!-- Sky -->
+  <rect width="500" height="500" fill="url(#alfaSky)"/>
+  <!-- Sun -->
+  <circle cx="430" cy="70" r="50" fill="url(#alfaSun)"/>
+  <circle cx="430" cy="70" r="42" fill="#FFF9C4" opacity="0.5"/>
+  <!-- Grandstands top (kids waving) -->
+  <rect x="0" y="0" width="500" height="75" fill="#6B8E23" opacity="0.95"/>
+  <rect x="0" y="65" width="500" height="12" fill="#8B4513"/>
+  <!-- Kids in top stands - row of cheerful faces -->
+  <g fill="#FFE0BD" stroke="#D4A574" stroke-width="1">
+    <circle cx="45" cy="32" r="10"/><circle cx="45" cy="28" r="5" fill="#1a1a1a"/><path d="M42 36 Q45 40 48 36" stroke="#8B4513" fill="none" stroke-width="1.5"/>
+    <circle cx="95" cy="35" r="11"/><circle cx="95" cy="30" r="5" fill="#1a1a1a"/><path d="M91 39 Q95 44 99 39" stroke="#8B4513" fill="none" stroke-width="1.5"/>
+    <circle cx="155" cy="28" r="12"/><circle cx="155" cy="22" r="5" fill="#1a1a1a"/><path d="M150 34 Q155 40 160 34" stroke="#8B4513" fill="none" stroke-width="1.5"/>
+    <circle cx="220" cy="32" r="10"/><circle cx="220" cy="27" r="5" fill="#1a1a1a"/><path d="M216 36 Q220 41 224 36" stroke="#8B4513" fill="none" stroke-width="1.5"/>
+    <circle cx="280" cy="35" r="11"/><circle cx="280" cy="30" r="5" fill="#1a1a1a"/><path d="M276 39 Q280 44 284 39" stroke="#8B4513" fill="none" stroke-width="1.5"/>
+    <circle cx="345" cy="30" r="12"/><circle cx="345" cy="24" r="5" fill="#1a1a1a"/><path d="M340 36 Q345 42 350 36" stroke="#8B4513" fill="none" stroke-width="1.5"/>
+    <circle cx="410" cy="33" r="10"/><circle cx="410" cy="28" r="5" fill="#1a1a1a"/><path d="M406 37 Q410 42 414 37" stroke="#8B4513" fill="none" stroke-width="1.5"/>
+    <circle cx="465" cy="30" r="11"/><circle cx="465" cy="25" r="5" fill="#1a1a1a"/><path d="M461 34 Q465 39 469 34" stroke="#8B4513" fill="none" stroke-width="1.5"/>
+  </g>
+  <!-- Checkered flags and signs -->
+  <g fill="none" stroke="#FFF" stroke-width="3">
+    <path d="M15 20 L25 15 L25 25 L15 20"/><path d="M18 22 L28 17 L28 27 L18 22"/>
+    <path d="M485 18 L475 13 L475 23 L485 18"/><path d="M482 20 L472 15 L472 25 L482 20"/>
+  </g>
+  <text x="250" y="52" text-anchor="middle" fill="#FFF" font-size="16" font-weight="bold" font-family="sans-serif">🏁 KIDS RACE DAY! 🏁</text>
+  <!-- Oval race track (behind the car) -->
+  <ellipse cx="250" cy="320" rx="220" ry="165" fill="url(#alfaTrack)" stroke="#1a1a1a" stroke-width="8"/>
+  <ellipse cx="250" cy="320" rx="185" ry="132" fill="none" stroke="#FFF" stroke-width="6" stroke-dasharray="18 22"/>
+  <ellipse cx="250" cy="320" rx="155" ry="108" fill="none" stroke="#E74C3C" stroke-width="4"/>
+  <!-- Track inner grass -->
+  <ellipse cx="250" cy="320" rx="145" ry="100" fill="#27AE60" opacity="0.9"/>
+  <!-- Tiny race cars on the track (background) -->
+  <g transform="translate(120,280) rotate(-25)">
+    <ellipse cx="0" cy="0" rx="22" ry="12" fill="#3498DB"/><circle cx="-12" cy="0" r="6" fill="#2C3E50"/><circle cx="12" cy="0" r="6" fill="#2C3E50"/>
+  </g>
+  <g transform="translate(380,265) rotate(15)">
+    <ellipse cx="0" cy="0" rx="22" ry="12" fill="#E67E22"/><circle cx="-12" cy="0" r="6" fill="#2C3E50"/><circle cx="12" cy="0" r="6" fill="#2C3E50"/>
+  </g>
+  <g transform="translate(250,180)">
+    <ellipse cx="0" cy="0" rx="20" ry="11" fill="#9B59B6"/><circle cx="-10" cy="0" r="5" fill="#2C3E50"/><circle cx="10" cy="0" r="5" fill="#2C3E50"/>
+  </g>
+  <!-- Kids and drivers in bottom stands -->
+  <rect x="0" y="435" width="500" height="65" fill="#7CB342" opacity="0.95"/>
+  <rect x="0" y="428" width="500" height="10" fill="#8B4513"/>
+  <g fill="#FFE0BD" stroke="#D4A574" stroke-width="1">
+    <circle cx="35" cy="458" r="9"/><circle cx="35" cy="454" r="4" fill="#1a1a1a"/><path d="M32 461 Q35 465 38 461" stroke="#8B4513" fill="none" stroke-width="1"/>
+    <circle cx="85" cy="462" r="10"/><circle cx="85" cy="457" r="4" fill="#1a1a1a"/><path d="M81 465 Q85 469 89 465" stroke="#8B4513" fill="none" stroke-width="1"/>
+    <circle cx="135" cy="455" r="11"/><circle cx="135" cy="450" r="4" fill="#1a1a1a"/><path d="M131 458 Q135 463 139 458" stroke="#8B4513" fill="none" stroke-width="1"/>
+    <circle cx="365" cy="460" r="9"/><circle cx="365" cy="456" r="4" fill="#1a1a1a"/><path d="M362 463 Q365 467 368 463" stroke="#8B4513" fill="none" stroke-width="1"/>
+    <circle cx="415" cy="455" r="10"/><circle cx="415" cy="450" r="4" fill="#1a1a1a"/><path d="M411 458 Q415 463 419 458" stroke="#8B4513" fill="none" stroke-width="1"/>
+    <circle cx="465" cy="458" r="9"/><circle cx="465" cy="454" r="4" fill="#1a1a1a"/><path d="M462 461 Q465 465 468 461" stroke="#8B4513" fill="none" stroke-width="1"/>
+  </g>
+  <!-- Kid drivers with helmets (small figures waving from pit wall) -->
+  <g fill="#FF6B6B"><rect x="70" y="400" width="24" height="28" rx="4"/><circle cx="82" cy="392" r="14" fill="#1a1a1a"/><circle cx="82" cy="392" r="10" fill="#3498DB"/><ellipse cx="82" cy="395" rx="6" ry="4" fill="#FFE0BD"/></g>
+  <g fill="#9B59B6"><rect x="405" y="398" width="24" height="28" rx="4"/><circle cx="417" cy="390" r="14" fill="#1a1a1a"/><circle cx="417" cy="390" r="10" fill="#F1C40F"/><ellipse cx="417" cy="393" rx="6" ry="4" fill="#FFE0BD"/></g>
+  <!-- Banners -->
+  <text x="250" y="478" text-anchor="middle" fill="#FFF" font-size="12" font-weight="bold" font-family="sans-serif">GO! GO! GO! 🚩</text>
+  <!-- Alfa Romeo–style vintage car (whimsical, rounded) -->
+  <!-- Shadow under car -->
+  <ellipse cx="250" cy="415" rx="140" ry="22" fill="rgba(0,0,0,0.2)"/>
+  <!-- Wheels -->
+  <g fill="url(#alfaWheel)" stroke="#0d1b27" stroke-width="4">
+    <circle cx="130" cy="385" r="38"/>
+    <circle cx="370" cy="385" r="38"/>
+  </g>
+  <g fill="#37474F" stroke="#1a252f" stroke-width="2">
+    <circle cx="130" cy="385" r="28"/>
+    <circle cx="370" cy="385" r="28"/>
+  </g>
+  <g fill="#ECEFF1" stroke="#90A4AE">
+    <circle cx="130" cy="385" r="18"/><circle cx="130" cy="385" r="8"/>
+    <circle cx="370" cy="385" r="18"/><circle cx="370" cy="385" r="8"/>
+  </g>
+  <!-- Car body base (red) -->
+  <path d="M75 340 Q85 300 120 275 L180 260 Q220 252 250 254 Q280 252 320 260 L380 275 Q415 300 425 340 L430 365 L70 365 Z" fill="url(#alfaCarRed)" stroke="#A93226" stroke-width="3"/>
+  <!-- Hood / bonnet (darker red) -->
+  <path d="M120 275 Q160 255 250 252 Q340 255 380 275 L375 310 Q340 320 250 322 Q160 320 125 310 Z" fill="#C0392B" stroke="#922B21" stroke-width="2"/>
+  <!-- Windshield -->
+  <path d="M185 262 Q220 248 250 250 Q280 248 315 262 L310 318 Q280 328 250 328 Q220 328 190 318 Z" fill="#81D4FA" opacity="0.85" stroke="#4FC3F7" stroke-width="2"/>
+  <path d="M248 252 L252 328" stroke="#B3E5FC" stroke-width="1" opacity="0.8"/>
+  <!-- Cabin rear -->
+  <path d="M315 262 L320 318 Q300 340 250 342 Q200 340 190 318 L185 262" fill="#E74C3C" stroke="#C0392B" stroke-width="2"/>
+  <!-- Headlights (friendly eyes) -->
+  <ellipse cx="95" cy="318" rx="22" ry="16" fill="#FFF59D"/>
+  <ellipse cx="95" cy="318" rx="14" ry="10" fill="#FFFDE7"/>
+  <ellipse cx="405" cy="318" rx="22" ry="16" fill="#FFF59D"/>
+  <ellipse cx="405" cy="318" rx="14" ry="10" fill="#FFFDE7"/>
+  <!-- Grille (smile) -->
+  <path d="M155 332 Q200 342 250 340 Q300 342 345 332" fill="none" stroke="#2C3E50" stroke-width="5" stroke-linecap="round"/>
+  <!-- Alfa-style badge (round) -->
+  <circle cx="250" cy="288" r="22" fill="#2C3E50" stroke="#F1C40F" stroke-width="3"/>
+  <text x="250" y="294" text-anchor="middle" fill="#F1C40F" font-size="18" font-weight="bold" font-family="sans-serif">AR</text>
+  <text x="250" y="488" text-anchor="middle" fill="#FFF" font-size="13" font-weight="bold" font-family="sans-serif">🏎️ Alfa Romeo — Ready to Race!</text>
+</svg>`;
+}
+
 // ── State ─────────────────────────────────────────────────────────────────────
 let selectedTheme = null;
 let selectedDiff  = null;
@@ -1628,11 +1782,12 @@ function buildSelectionUI() {
     dr.appendChild(p);
   });
 
-  // Artwork picker — shown for themes with real photo images
+  // Artwork picker — shown for themes with real photo images or multiple artwork options
   const theme = THEMES.find(t => t.id === selectedTheme);
   const artSection = document.getElementById('artwork-section');
   const artGrid    = document.getElementById('artwork-grid');
-  const hasPhotos  = theme && theme.svgs.some(s => s.startsWith('http'));
+  const isImageUrl = (s) => typeof s === 'string' && (s.startsWith('http') || s.startsWith('data:image/') || /\.(jpe?g|png|webp|gif)$/i.test(s.trim()));
+  const hasPhotos  = theme && (theme.svgs.length > 1 || theme.svgs.some(isImageUrl));
 
   if (hasPhotos) {
     artSection.style.display = 'block';
@@ -1739,8 +1894,9 @@ function startPuzzle() {
 }
 
 function svgToDataUrl(src) {
-  // Real image URL — pass through directly
+  // Real image URL or relative path — pass through directly
   if (src.startsWith('http') || src.startsWith('data:image/')) return src;
+  if (!src.trim().startsWith('<')) return src; // relative path to .jpg/.png etc.
   return 'data:image/svg+xml,' + encodeURIComponent(src);
 }
 
