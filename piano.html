@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Piano Genie</title>
+  <style>
+    :root {
+      --bg: #0f0f14;
+      --card: #1a1a22;
+      --accent: #a78bfa;
+      --accent-dim: #7c3aed;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --green: #34d399;
+      --red: #f87171;
+      --radius: 16px;
+      --left-hand: #a855f7;
+      --left-hand-dim: #7e22ce;
+      --right-hand: #f97316;
+      --right-hand-dim: #ea580c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+
+    .top-bar {
+      background: linear-gradient(135deg, #4c1d95, #6d28d9);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 2px 16px rgba(76,29,149,.4);
+    }
+    .back-btn {
+      border: none;
+      background: rgba(255,255,255,.2);
+      color: #fff;
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: .9rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .back-btn:hover { background: rgba(255,255,255,.3); }
+    .top-bar-title { color: #fff; font-weight: 800; font-size: 1.1rem; flex: 1; }
+
+    .screen { display: none; min-height: 100vh; flex-direction: column; }
+    .screen.active { display: flex; }
+
+    .scroll { flex: 1; overflow-y: auto; padding: 18px 16px; }
+
+    /* Home */
+    .hero {
+      background: linear-gradient(145deg, #4c1d95 0%, #6d28d9 50%, #7c3aed 100%);
+      border-radius: 24px;
+      padding: 28px 20px;
+      color: #fff;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+    .hero h1 { font-size: 1.8rem; font-weight: 900; margin-bottom: 6px; }
+    .hero p { font-size: .9rem; opacity: .9; }
+    .tempo-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .tempo-label { font-size: .85rem; font-weight: 700; color: rgba(255,255,255,.9); }
+    .tempo-btn {
+      border: 2px solid rgba(255,255,255,.4);
+      background: rgba(255,255,255,.1);
+      color: #fff;
+      border-radius: 12px;
+      padding: 10px 18px;
+      font-size: .95rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .tempo-btn.active { background: rgba(255,255,255,.35); border-color: #fff; }
+    .tempo-btn:hover:not(.active) { background: rgba(255,255,255,.2); }
+    .session-est { font-size: .8rem; margin-top: 10px; opacity: .85; }
+    .btn-primary {
+      display: block;
+      width: 100%;
+      max-width: 280px;
+      margin: 20px auto 0;
+      padding: 16px 24px;
+      background: #fff;
+      color: #6d28d9;
+      border: none;
+      border-radius: 16px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(0,0,0,.2);
+    }
+    .btn-primary:hover { transform: scale(1.02); }
+    .btn-primary:active { transform: scale(.98); }
+    .section-label { font-size: .7rem; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin: 22px 0 10px; }
+    .genre-tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .genre-tab {
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: 2px solid var(--card);
+      background: var(--card);
+      color: var(--muted);
+      font-weight: 700;
+      font-size: .85rem;
+      cursor: pointer;
+    }
+    .genre-tab.active { border-color: var(--accent); color: var(--accent); background: rgba(167,139,250,.1); }
+    .song-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+    .song-card:hover { border-color: var(--accent-dim); }
+    .song-card .title { font-weight: 700; font-size: 1rem; }
+    .song-card .meta { font-size: .8rem; color: var(--muted); margin-top: 2px; }
+    .song-card .genre-tag { font-size: .7rem; padding: 4px 8px; border-radius: 8px; background: rgba(167,139,250,.2); color: var(--accent); font-weight: 700; }
+
+    /* Session / Play */
+    .session-header {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .session-song-title { font-weight: 800; font-size: 1.05rem; }
+    .session-progress { font-size: .8rem; color: var(--muted); }
+    .sheet-music-wrap {
+      background: #1c1917;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      max-height: 200px;
+    }
+    .sheet-music-wrap svg {
+      display: block;
+      min-width: 100%;
+      max-height: 172px;
+      width: 100%;
+      height: auto;
+    }
+    .staff-line { stroke: #a8a29e; stroke-width: 1.4; }
+    .bar-line { stroke: #a8a29e; stroke-width: 1.8; }
+    .playhead-line { stroke: #facc15; stroke-width: 2.5; opacity: 0.9; }
+    .note-head { fill: #57534e; stroke: none; }
+    .note-head.current { fill: #facc15; stroke: #ca8a04; stroke-width: 2; }
+    .note-head.done { fill: #3b82f6; stroke: #2563eb; }
+    .note-head.wrong { fill: #ef4444; stroke: #dc2626; }
+    .note-stem { stroke: #57534e; stroke-width: 1.5; }
+    .note-stem.current { stroke: #ca8a04; }
+    .note-stem.done { stroke: #2563eb; }
+    .note-stem.wrong { stroke: #dc2626; }
+    .ledger-line { stroke: #57534e; stroke-width: 1.2; }
+    .ledger-line.current { stroke: #ca8a04; }
+    .ledger-line.done { stroke: #2563eb; }
+    .ledger-line.wrong { stroke: #dc2626; }
+    .clef-symbol { fill: var(--text); font-family: Georgia, serif; font-size: 48px; }
+    .notation-strip {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 12px;
+      margin-bottom: 12px;
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .note-chip {
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 1rem;
+      background: rgba(167,139,250,.15);
+      color: var(--accent);
+      border: 2px solid transparent;
+    }
+    .note-chip.current { border-color: var(--accent); background: rgba(167,139,250,.3); box-shadow: 0 0 0 3px rgba(167,139,250,.2); }
+    .note-chip.done { background: rgba(52,211,153,.2); color: var(--green); border-color: var(--green); }
+    .note-chip.wrong { background: rgba(248,113,113,.2); color: var(--red); border-color: var(--red); }
+    .keyboard-wrap {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 12px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .keyboard-legend {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: .7rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 6px;
+      padding: 0 4px;
+    }
+    .keyboard-legend .left-label { color: var(--left-hand); }
+    .keyboard-legend .middle-c-label { color: var(--muted); }
+    .keyboard-legend .right-label { color: var(--right-hand); }
+    .keyboard {
+      display: flex;
+      height: 100px;
+      min-width: min(100%, 720px);
+      position: relative;
+      margin: 0 auto;
+    }
+    .key {
+      flex: 1;
+      min-width: 28px;
+      max-width: 44px;
+      border-radius: 0 0 6px 6px;
+      border: 1px solid #444;
+      cursor: pointer;
+      position: relative;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding-bottom: 6px;
+      font-size: .6rem;
+      font-weight: 800;
+      color: #475569;
+      user-select: none;
+      background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+    }
+    .key.black {
+      background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
+      color: #94a3b8;
+      min-width: 18px;
+      max-width: 28px;
+      margin-left: -10px;
+      margin-right: -10px;
+      z-index: 1;
+      height: 75%;
+    }
+    .key.highlight-left { background: linear-gradient(180deg, #c084fc 0%, var(--left-hand) 100%); color: #fff; box-shadow: inset 0 0 0 2px var(--left-hand-dim); border-color: var(--left-hand-dim); }
+    .key.black.highlight-left { background: linear-gradient(180deg, var(--left-hand-dim) 0%, #581c87 100%); color: #e9d5ff; }
+    .key.highlight-right { background: linear-gradient(180deg, #fdba74 0%, var(--right-hand) 100%); color: #fff; box-shadow: inset 0 0 0 2px var(--right-hand-dim); border-color: var(--right-hand-dim); }
+    .key.black.highlight-right { background: linear-gradient(180deg, var(--right-hand-dim) 0%, #c2410c 100%); color: #ffedd5; }
+    .key:active { transform: scale(0.97); }
+    .mode-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .mode-btn {
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: 2px solid var(--card);
+      background: var(--card);
+      color: var(--muted);
+      font-weight: 700;
+      font-size: .85rem;
+      cursor: pointer;
+    }
+    .mode-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(167,139,250,.15); }
+    .mic-status {
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: var(--card);
+      font-size: .85rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .mic-status.listening { background: rgba(52,211,153,.15); color: var(--green); border: 2px solid var(--green); }
+    .mic-status.error { background: rgba(248,113,113,.15); color: var(--red); }
+    .mic-status.clickable { cursor: pointer; }
+    .practice-opts { margin-bottom: 12px; }
+    .practice-toggle { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: .9rem; color: var(--text); cursor: pointer; }
+    .practice-toggle input { width: 18px; height: 18px; }
+    .practice-details { margin-top: 10px; padding: 12px; border-radius: 12px; background: rgba(0,0,0,.2); display: none; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+    .practice-details.visible { display: flex; }
+    .practice-label { font-size: .8rem; color: var(--muted); font-weight: 600; }
+    .practice-hint { font-size: .8rem; color: var(--muted); }
+    .practice-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .small-btn { padding: 6px 12px; border-radius: 8px; border: 2px solid var(--card); background: var(--card); color: var(--text); font-size: .8rem; font-weight: 600; cursor: pointer; }
+    .small-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .small-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(167,139,250,.15); }
+    .loop-label { display: flex; align-items: center; gap: 6px; font-size: .85rem; color: var(--text); cursor: pointer; }
+    .loop-label input { width: 16px; height: 16px; }
+    .controls-row { display: flex; gap: 10px; margin-top: 16px; justify-content: center; flex-wrap: wrap; }
+    .btn-secondary {
+      padding: 12px 20px;
+      border-radius: 12px;
+      border: 2px solid var(--card);
+      background: var(--card);
+      color: var(--text);
+      font-weight: 700;
+      font-size: .9rem;
+      cursor: pointer;
+    }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+    .session-done-card {
+      background: linear-gradient(145deg, #4c1d95, #6d28d9);
+      border-radius: 24px;
+      padding: 32px 24px;
+      text-align: center;
+      color: #fff;
+      margin: 20px 0;
+    }
+    .session-done-card h2 { font-size: 1.5rem; margin-bottom: 8px; }
+    .session-done-card p { opacity: .9; font-size: .95rem; }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <button class="back-btn" id="backBtn">← Back</button>
+    <span class="top-bar-title" id="headerTitle">Piano Genie</span>
+  </div>
+
+  <!-- Home -->
+  <div id="screen-home" class="screen active">
+    <div class="scroll">
+      <div class="hero">
+        <h1>🎹 Piano Genie</h1>
+        <p>20–30 min sessions • Classical, Pop & Disney</p>
+        <div class="tempo-row">
+          <span class="tempo-label">Tempo:</span>
+          <button class="tempo-btn" data-bpm="60">60 BPM</button>
+          <button class="tempo-btn" data-bpm="80">80 BPM</button>
+          <button class="tempo-btn active" data-bpm="100">100 BPM</button>
+          <button class="tempo-btn" data-bpm="120">120 BPM</button>
+        </div>
+        <div class="session-est" id="sessionEst">~25 min session</div>
+        <button class="btn-primary" id="startSessionBtn">Start 20–30 min Session</button>
+      </div>
+      <div class="section-label">Browse by genre</div>
+      <div class="genre-tabs">
+        <button class="genre-tab active" data-genre="all">All</button>
+        <button class="genre-tab" data-genre="classical">Classical</button>
+        <button class="genre-tab" data-genre="pop">Pop</button>
+        <button class="genre-tab" data-genre="disney">Disney</button>
+      </div>
+      <div id="songList"></div>
+    </div>
+  </div>
+
+  <!-- Session / Play -->
+  <div id="screen-play" class="screen">
+    <div class="scroll">
+      <div class="session-header">
+        <div>
+          <div class="session-song-title" id="playSongTitle">—</div>
+          <div class="session-progress" id="playProgress">Song 1 of 6</div>
+        </div>
+        <div class="tempo-row">
+          <span class="tempo-label">Tempo:</span>
+          <button class="tempo-btn" data-bpm="60">60</button>
+          <button class="tempo-btn" data-bpm="80">80</button>
+          <button class="tempo-btn active" data-bpm="100">100</button>
+          <button class="tempo-btn" data-bpm="120">120</button>
+        </div>
+      </div>
+      <div class="mode-row">
+        <button class="mode-btn active" id="modeTap">Tap keys</button>
+        <button class="mode-btn" id="modeMic">Use microphone</button>
+      </div>
+      <div class="practice-opts" id="practiceOpts">
+        <label class="practice-toggle"><input type="checkbox" id="practiceModeCheck"> Practice mode</label>
+        <div class="practice-details" id="practiceDetails">
+          <span class="practice-label">Listen first:</span> <span class="practice-hint">we play the note, then you play it.</span>
+          <div class="practice-row">
+            <span class="practice-label">Playback:</span>
+            <button class="small-btn active" id="playbackNormal">Normal</button>
+            <button class="small-btn" id="playbackSlow">Slow</button>
+          </div>
+          <div class="practice-row">
+            <span class="practice-label">Phrase:</span>
+            <button class="small-btn active" id="phrase4">4 notes</button>
+            <button class="small-btn" id="phrase8">8 notes</button>
+            <label class="loop-label"><input type="checkbox" id="loopPhraseCheck"> Loop phrase</label>
+          </div>
+          <button class="small-btn" id="nextPhraseBtn">Next phrase →</button>
+          <button class="small-btn" id="playAgainBtn">Play note again</button>
+          <button class="small-btn" id="playPieceBtn">Play piece</button>
+        </div>
+      </div>
+      <div class="mic-status" id="micStatus" style="display:none" title="Tap to enable">Tap to enable microphone — then play the highlighted note on your piano.</div>
+      <div class="sheet-music-wrap" id="sheetMusicWrap">
+        <svg id="sheetMusicSvg" viewBox="0 0 400 100" preserveAspectRatio="xMidYMid meet"></svg>
+      </div>
+      <div class="notation-strip" id="notationStrip"></div>
+      <div class="keyboard-wrap" id="keyboardWrap">
+        <div class="keyboard-legend">
+          <span class="left-label">← Left hand (bass)</span>
+          <span class="middle-c-label">Middle C</span>
+          <span class="right-label">Right hand (melody) →</span>
+        </div>
+        <div class="keyboard" id="keyboard"></div>
+      </div>
+      <div class="controls-row">
+        <button class="btn-secondary" id="prevSongBtn">← Prev song</button>
+        <button class="btn-secondary" id="nextSongBtn">Next song →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Session complete -->
+  <div id="screen-done" class="screen">
+    <div class="scroll">
+      <div class="session-done-card">
+        <h2>🎉 Session complete!</h2>
+        <p id="doneSummary">You played 6 pieces. Great focus!</p>
+        <button class="btn-primary" id="doneHomeBtn" style="margin-top:20px">Back to Piano Genie</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const SESSION_TARGET_MIN = 20;
+      const SESSION_TARGET_MAX = 30;
+
+      const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+      function noteToMidi(name) {
+        const match = name.match(/^([A-G]#?)(\d+)$/);
+        if (!match) return 60;
+        const i = NOTES.indexOf(match[1]);
+        const oct = parseInt(match[2], 10);
+        return (oct + 1) * 12 + i;
+      }
+      function midiToNote(midi) {
+        midi = Math.round(midi);
+        if (midi < 0 || midi > 127) return null;
+        const oct = Math.floor(midi / 12) - 1;
+        const i = midi % 12;
+        return NOTES[i] + oct;
+      }
+
+      const SONGS = [
+        { id: 'fur-elise', title: 'Für Elise (theme)', genre: 'classical', estMin: 1.5, notes: [
+          { n: 'E5', d: 0.5 },{ n: 'D#5', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'D#5', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'B4', d: 0.5 },{ n: 'D5', d: 0.5 },{ n: 'C5', d: 0.5 },
+          { n: 'A4', d: 1 },{ n: 'C4', d: 0.5 },{ n: 'E4', d: 0.5 },{ n: 'A4', d: 0.5 },{ n: 'B4', d: 1 },{ n: 'E4', d: 0.5 },{ n: 'G#4', d: 0.5 },{ n: 'B4', d: 0.5 },{ n: 'C5', d: 1 }
+        ]},
+        { id: 'moonlight', title: 'Moonlight Sonata (theme)', genre: 'classical', estMin: 2, notes: [
+          { n: 'G#3', d: 1 },{ n: 'C#4', d: 1 },{ n: 'E4', d: 1 },{ n: 'G#3', d: 1 },{ n: 'C#4', d: 1 },{ n: 'E4', d: 1 },{ n: 'G#3', d: 1 },{ n: 'C#4', d: 1 },{ n: 'E4', d: 1 },
+          { n: 'A2', d: 1 },{ n: 'A3', d: 1 },{ n: 'C#4', d: 1 },{ n: 'E4', d: 1 },{ n: 'A2', d: 1 },{ n: 'A3', d: 1 },{ n: 'C#4', d: 1 },{ n: 'E4', d: 1 }
+        ]},
+        { id: 'canon-d', title: 'Canon in D (melody)', genre: 'classical', estMin: 2, notes: [
+          { n: 'D4', d: 1 },{ n: 'F#4', d: 1 },{ n: 'A4', d: 1 },{ n: 'F#4', d: 1 },{ n: 'E4', d: 1 },{ n: 'F#4', d: 1 },{ n: 'G4', d: 1 },{ n: 'A4', d: 1 },
+          { n: 'B4', d: 1 },{ n: 'A4', d: 1 },{ n: 'G4', d: 1 },{ n: 'F#4', d: 1 },{ n: 'E4', d: 1 },{ n: 'D4', d: 1 }
+        ]},
+        { id: 'minuet-g', title: 'Minuet in G (theme)', genre: 'classical', estMin: 1.5, notes: [
+          { n: 'G4', d: 0.5 },{ n: 'A4', d: 0.5 },{ n: 'B4', d: 0.5 },{ n: 'C5', d: 0.5 },{ n: 'D5', d: 1 },{ n: 'B4', d: 0.5 },{ n: 'G4', d: 0.5 },{ n: 'A4', d: 1 },
+          { n: 'F#4', d: 0.5 },{ n: 'G4', d: 1.5 }
+        ]},
+        { id: 'let-it-go', title: 'Let It Go (theme)', genre: 'disney', estMin: 4, notes: [
+          { n: 'C4', d: 0.5, left: 'F2' },{ n: 'C4', d: 0.5 },{ n: 'C4', d: 0.5, left: 'C3' },{ n: 'C4', d: 0.5 },{ n: 'C4', d: 0.5, left: 'F2' },{ n: 'C4', d: 0.5 },{ n: 'A#3', d: 0.5 },{ n: 'C4', d: 0.5, left: 'C3' },{ n: 'A#3', d: 0.5 },{ n: 'G#3', d: 1, left: 'G#2' },
+          { n: 'G#3', d: 0.5 },{ n: 'A#3', d: 0.5, left: 'F2' },{ n: 'G#3', d: 0.5 },{ n: 'A#3', d: 0.5 },{ n: 'G#3', d: 0.5 },{ n: 'G3', d: 0.5, left: 'C3' },{ n: 'F3', d: 1, left: 'F2' },
+          { n: 'F3', d: 0.5, left: 'F2' },{ n: 'C4', d: 0.5 },{ n: 'C4', d: 0.5, left: 'C3' },{ n: 'C4', d: 0.5 },{ n: 'C4', d: 0.5 },{ n: 'D#4', d: 0.5, left: 'D#2' },{ n: 'D#4', d: 0.5 },{ n: 'C4', d: 1, left: 'C3' },
+          { n: 'G#3', d: 0.5 },{ n: 'A#3', d: 0.5, left: 'F2' },{ n: 'C4', d: 0.5 },{ n: 'A#3', d: 0.5 },{ n: 'G#3', d: 0.5 },{ n: 'A#3', d: 1, left: 'G#2' },
+          { n: 'C4', d: 0.5, left: 'F2' },{ n: 'C4', d: 0.5 },{ n: 'D#4', d: 0.5 },{ n: 'F4', d: 0.5, left: 'C3' },{ n: 'D#4', d: 0.5 },{ n: 'C4', d: 0.5 },{ n: 'D#4', d: 0.5 },{ n: 'D#4', d: 0.5, left: 'D#2' },{ n: 'C#4', d: 0.5 },{ n: 'C4', d: 0.5 },{ n: 'C#4', d: 0.5 },{ n: 'C4', d: 1, left: 'F2' },
+          { n: 'C4', d: 0.5 },{ n: 'C4', d: 0.5, left: 'C3' },{ n: 'A#3', d: 0.5 },{ n: 'G#3', d: 0.5 },{ n: 'A#3', d: 1 },{ n: 'A#3', d: 0.5 },{ n: 'C4', d: 0.5, left: 'F2' },{ n: 'A#3', d: 0.5 },{ n: 'G#3', d: 0.5 },{ n: 'F3', d: 0.5 },{ n: 'F3', d: 1, left: 'G#2' },
+          { n: 'A#3', d: 0.5, left: 'A#2' },{ n: 'A#3', d: 0.5 },{ n: 'D#4', d: 0.5 },{ n: 'D#4', d: 0.5, left: 'D#2' },{ n: 'A#3', d: 0.5 },{ n: 'A#3', d: 0.5 },{ n: 'F4', d: 0.5 },{ n: 'F4', d: 1, left: 'F2' },
+          { n: 'F4', d: 0.5, left: 'F2' },{ n: 'D#4', d: 0.5 },{ n: 'F4', d: 0.5 },{ n: 'F4', d: 0.5 },{ n: 'F4', d: 0.5 },{ n: 'F4', d: 0.5, left: 'C3' },{ n: 'G4', d: 0.5 },{ n: 'G#4', d: 0.5 },{ n: 'G4', d: 0.5 },{ n: 'G4', d: 1, left: 'G#2' },
+          { n: 'A#3', d: 0.5, left: 'A#2' },{ n: 'A#3', d: 0.5 },{ n: 'D#4', d: 0.5 },{ n: 'D#4', d: 0.5, left: 'D#2' },{ n: 'A#3', d: 0.5 },{ n: 'A#3', d: 0.5 },{ n: 'F4', d: 0.5 },{ n: 'F4', d: 1.5, left: 'F2' },
+          { n: 'D#4', d: 0.5 },{ n: 'F4', d: 0.5, left: 'F2' },{ n: 'G4', d: 0.5 },{ n: 'G#4', d: 0.5 },{ n: 'G#4', d: 1, left: 'G#2' },
+          { n: 'F4', d: 1, left: 'F2' },{ n: 'G4', d: 1, left: 'C3' },{ n: 'G#4', d: 2, left: 'G#2' },{ n: 'D#4', d: 1, left: 'D#2' },{ n: 'D#4', d: 1 },{ n: 'A#4', d: 2, left: 'A#2' },
+          { n: 'G#4', d: 0.5 },{ n: 'F4', d: 0.5, left: 'F2' },{ n: 'F4', d: 0.5 },{ n: 'F4', d: 0.5 },{ n: 'F4', d: 0.5 },{ n: 'G4', d: 0.5, left: 'C3' },{ n: 'G#4', d: 2, left: 'G#2' },
+          { n: 'F4', d: 1, left: 'F2' },{ n: 'G4', d: 1, left: 'C3' },{ n: 'G#4', d: 2, left: 'G#2' },{ n: 'D#4', d: 1, left: 'D#2' },{ n: 'D#4', d: 1 },{ n: 'A#4', d: 2, left: 'A#2' },
+          { n: 'G#4', d: 0.5 },{ n: 'A#4', d: 0.5, left: 'F2' },{ n: 'C5', d: 0.5 },{ n: 'C5', d: 0.5 },{ n: 'C5', d: 0.5 },{ n: 'C5', d: 0.5, left: 'C3' },{ n: 'G#4', d: 2, left: 'G#2' }
+        ]},
+        { id: 'whole-new-world', title: 'A Whole New World (theme)', genre: 'disney', estMin: 2, notes: [
+          { n: 'C5', d: 1 },{ n: 'B4', d: 0.5 },{ n: 'A4', d: 0.5 },{ n: 'G4', d: 1 },{ n: 'E4', d: 0.5 },{ n: 'G4', d: 0.5 },{ n: 'A4', d: 1 },{ n: 'G4', d: 1 },
+          { n: 'F#4', d: 0.5 },{ n: 'E4', d: 0.5 },{ n: 'D4', d: 1 },{ n: 'C#4', d: 0.5 },{ n: 'D4', d: 0.5 },{ n: 'E4', d: 1 }
+        ]},
+        { id: 'how-far-ill-go', title: 'How Far I\'ll Go (theme)', genre: 'disney', estMin: 1.5, notes: [
+          { n: 'E4', d: 0.5 },{ n: 'G4', d: 0.5 },{ n: 'A4', d: 1 },{ n: 'G4', d: 0.5 },{ n: 'E4', d: 0.5 },{ n: 'D4', d: 1 },{ n: 'C4', d: 0.5 },{ n: 'D4', d: 0.5 },{ n: 'E4', d: 1 },
+          { n: 'D4', d: 0.5 },{ n: 'C4', d: 0.5 },{ n: 'D4', d: 1 }
+        ]},
+        { id: 'count-on-me', title: 'Count on Me (verse)', genre: 'pop', estMin: 2, notes: [
+          { n: 'C5', d: 0.5 },{ n: 'C5', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'G5', d: 0.5 },{ n: 'G4', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'C5', d: 1 },{ n: 'B4', d: 0.5 },{ n: 'A4', d: 0.5 },{ n: 'G4', d: 1 },
+          { n: 'C5', d: 0.5 },{ n: 'C5', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'G5', d: 0.5 },{ n: 'G4', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'C5', d: 1 }
+        ]},
+        { id: 'hallelujah', title: 'Hallelujah (intro)', genre: 'pop', estMin: 2, notes: [
+          { n: 'C5', d: 1 },{ n: 'B4', d: 0.5 },{ n: 'A4', d: 0.5 },{ n: 'G4', d: 1 },{ n: 'E4', d: 0.5 },{ n: 'G4', d: 0.5 },{ n: 'A4', d: 1 },{ n: 'G4', d: 1 },
+          { n: 'F4', d: 0.5 },{ n: 'E4', d: 0.5 },{ n: 'D4', d: 1 },{ n: 'C4', d: 0.5 },{ n: 'D4', d: 0.5 },{ n: 'E4', d: 1 }
+        ]},
+        { id: 'someone-like-you', title: 'Someone Like You (theme)', genre: 'pop', estMin: 1.5, notes: [
+          { n: 'A4', d: 1 },{ n: 'G4', d: 0.5 },{ n: 'E4', d: 0.5 },{ n: 'C#4', d: 1 },{ n: 'E4', d: 0.5 },{ n: 'G4', d: 0.5 },{ n: 'A4', d: 1 },{ n: 'B4', d: 0.5 },{ n: 'A4', d: 0.5 },{ n: 'G4', d: 1 },
+          { n: 'F#4', d: 0.5 },{ n: 'E4', d: 0.5 },{ n: 'D4', d: 1 }
+        ]}
+      ];
+
+      function buildSession(bpm) {
+        let totalMin = 0;
+        const picked = [];
+        const shuffled = [...SONGS].sort(() => Math.random() - 0.5);
+        for (const s of shuffled) {
+          if (totalMin >= SESSION_TARGET_MAX) break;
+          picked.push({
+            id: s.id,
+            title: s.title,
+            genre: s.genre,
+            estMin: s.estMin,
+            notes: s.notes.map(n => ({ n: n.n, d: n.d, left: n.left, done: false, wrong: false }))
+          });
+          totalMin += s.estMin;
+          if (totalMin >= SESSION_TARGET_MIN && totalMin <= SESSION_TARGET_MAX) break;
+        }
+        if (totalMin < SESSION_TARGET_MIN && shuffled.length > picked.length) {
+          const next = shuffled.find(x => !picked.some(p => p.id === x.id));
+          if (next) {
+            picked.push({
+              id: next.id,
+              title: next.title,
+              genre: next.genre,
+              estMin: next.estMin,
+              notes: next.notes.map(n => ({ n: n.n, d: n.d, left: n.left, done: false, wrong: false }))
+            });
+            totalMin += next.estMin;
+          }
+        }
+        return { songs: picked, estMin: Math.round(totalMin) };
+      }
+
+      let state = {
+        bpm: 100,
+        session: null,
+        songIndex: 0,
+        noteIndex: 0,
+        audioCtx: null,
+        useMic: false,
+        micStream: null,
+        micAnalyser: null,
+        micAnimationId: null,
+        lastDetectedNote: null,
+        lastDetectedTime: 0,
+        micDebounceMs: 400,
+        practiceMode: false,
+        listenFirstPlayed: false,
+        practiceSlow: false,
+        phraseStart: 0,
+        phraseLength: 4,
+        loopPhrase: false,
+        autoPlayTimeouts: [],
+        autoPlayIntervalId: null,
+        autoPlayNoteIndex: -1
+      };
+
+      function getScreen(id) { return document.getElementById('screen-' + id); }
+      function showScreen(id) {
+        if (id !== 'play') onPlayScreenLeave();
+        ['home','play','done'].forEach(s => getScreen(s).classList.remove('active'));
+        getScreen(id).classList.add('active');
+        document.getElementById('headerTitle').textContent = id === 'home' ? 'Piano Genie' : id === 'done' ? 'Session complete' : (state.session && state.session.songs[state.songIndex]) ? state.session.songs[state.songIndex].title : 'Piano Genie';
+      }
+
+      function initAudio() {
+        if (state.audioCtx) return state.audioCtx;
+        state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        return state.audioCtx;
+      }
+      function playNote(name, durationMs) {
+        try {
+          const ctx = initAudio();
+          const midi = noteToMidi(name);
+          const freq = 440 * Math.pow(2, (midi - 69) / 12);
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.frequency.value = freq;
+          osc.type = 'sine';
+          gain.gain.setValueAtTime(0.15, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + durationMs / 1000);
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + durationMs / 1000);
+        } catch (_) {}
+      }
+
+      function detectPitchFromBuffer(buffer, sampleRate) {
+        const SIZE = buffer.length;
+        const MAX_LAG = Math.floor(SIZE / 2);
+        let rms = 0;
+        for (let i = 0; i < SIZE; i++) rms += buffer[i] * buffer[i];
+        rms = Math.sqrt(rms / SIZE);
+        if (rms < 0.01) return null;
+        let bestLag = -1, bestCorr = -1;
+        const minLag = Math.floor(sampleRate / 2000);
+        const maxLag = Math.min(MAX_LAG, Math.ceil(sampleRate / 50));
+        for (let lag = minLag; lag < maxLag; lag++) {
+          let corr = 0;
+          for (let i = 0; i < MAX_LAG; i++) corr += buffer[i] * buffer[i + lag];
+          if (corr > bestCorr) {
+            bestCorr = corr;
+            bestLag = lag;
+          }
+        }
+        if (bestLag <= 0) return null;
+        const freq = sampleRate / bestLag;
+        if (freq < 55 || freq > 1760) return null;
+        return freq;
+      }
+
+      function freqToMidi(freq) {
+        return 69 + 12 * Math.log2(freq / 440);
+      }
+
+      function startMic() {
+        const statusEl = document.getElementById('micStatus');
+        statusEl.style.display = 'block';
+        statusEl.className = 'mic-status';
+        statusEl.textContent = 'Requesting microphone...';
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(stream => {
+            state.micStream = stream;
+            const ctx = initAudio();
+            const analyser = ctx.createAnalyser();
+            analyser.fftSize = 2048;
+            analyser.smoothingTimeConstant = 0.4;
+            const source = ctx.createMediaStreamSource(stream);
+            source.connect(analyser);
+            state.micAnalyser = analyser;
+            const bufferLength = analyser.fftSize;
+            const dataArray = new Float32Array(bufferLength);
+            statusEl.textContent = 'Listening... Play the highlighted note on your piano.';
+            statusEl.classList.add('listening');
+
+            function tick() {
+              if (!state.micAnalyser) return;
+              analyser.getFloatTimeDomainData(dataArray);
+              const freq = detectPitchFromBuffer(dataArray, ctx.sampleRate);
+              const now = Date.now();
+              if (freq) {
+                const midi = freqToMidi(freq);
+                const note = midiToNote(midi);
+                state.lastDetectedNote = note;
+                statusEl.textContent = 'Listening... ' + (note ? note.replace('#','♯') : '—');
+                if (state.useMic && state.session && note) {
+                  const song = state.session.songs[state.songIndex];
+                  const cur = song && song.notes[state.noteIndex];
+                  if (cur && cur.n === note && now - state.lastDetectedTime > state.micDebounceMs) {
+                    state.lastDetectedTime = now;
+                    onKeyPress(note);
+                  }
+                }
+              } else {
+                statusEl.textContent = 'Listening... Play the highlighted note on your piano.';
+              }
+              state.micAnimationId = requestAnimationFrame(tick);
+            }
+            tick();
+          })
+          .catch(err => {
+            statusEl.textContent = 'Microphone access denied or unavailable. Use tap mode.';
+            statusEl.classList.add('error');
+          });
+      }
+
+      function stopMic() {
+        if (state.micAnimationId) {
+          cancelAnimationFrame(state.micAnimationId);
+          state.micAnimationId = null;
+        }
+        if (state.micStream) {
+          state.micStream.getTracks().forEach(t => t.stop());
+          state.micStream = null;
+        }
+        state.micAnalyser = null;
+        const statusEl = document.getElementById('micStatus');
+        if (statusEl) {
+          statusEl.className = 'mic-status';
+          statusEl.classList.toggle('clickable', state.useMic);
+          if (state.useMic) statusEl.textContent = 'Tap to enable microphone — then play the highlighted note on your piano.';
+        }
+      }
+
+      function whiteKeys(fromC, count) {
+        const keys = [];
+        for (let i = 0; i < count; i++) {
+          const oct = fromC + Math.floor(i / 7);
+          const j = i % 7;
+          const names = ['C','D','E','F','G','A','B'];
+          keys.push({ name: names[j] + oct, black: false });
+        }
+        return keys;
+      }
+      function allKeys(fromC, count) {
+        const names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+        const keys = [];
+        for (let i = 0; i < count; i++) {
+          const oct = fromC + Math.floor(i / 12);
+          const j = i % 12;
+          keys.push({ name: names[j] + oct, black: ['C#','D#','F#','G#','A#'].includes(names[j]) });
+        }
+        return keys;
+      }
+
+      const STAFF_LINE_SPACING = 10;
+      const TREBLE_TOP = 10;
+      const TREBLE_BOTTOM_Y = TREBLE_TOP + 4 * STAFF_LINE_SPACING;
+      const BASS_TOP = 58;
+      const BASS_BOTTOM_Y = BASS_TOP + 4 * STAFF_LINE_SPACING;
+      const EXTRA_BELOW_BASS = 30;
+      const NOTE_STEP = STAFF_LINE_SPACING / 2;
+      const NOTE_HEAD_W = 9;
+      const NOTE_HEAD_H = 6.5;
+      const STEM_LEN = 22;
+      const CLEF_WIDTH = 32;
+      const TIME_SIG_WIDTH = 16;
+      const BEAT_WIDTH = 18;
+      const STAFF_LEFT = 4;
+      const TREBLE_E4_MIDI = 64;
+      const BASS_G2_MIDI = 43;
+      const BEATS_PER_BAR = 4;
+
+      function noteToStaffYTreble(noteName) {
+        const midi = noteToMidi(noteName);
+        return TREBLE_BOTTOM_Y - (midi - TREBLE_E4_MIDI) * NOTE_STEP;
+      }
+      function noteToStaffYBass(noteName) {
+        const midi = noteToMidi(noteName);
+        return BASS_BOTTOM_Y - (midi - BASS_G2_MIDI) * NOTE_STEP;
+      }
+
+      function drawNoteOnStaff(g, x, noteName, staffYFn, stemThresholdMidi, statusClass, staffClass) {
+        const y = staffYFn(noteName);
+        const midi = noteToMidi(noteName);
+        const needLedgerBelow = staffClass === 'treble' ? midi < TREBLE_E4_MIDI : midi < BASS_G2_MIDI;
+        const needLedgerAbove = staffClass === 'treble' ? midi > 77 : midi > 55;
+        const ledgerClass = statusClass ? 'ledger-line ' + statusClass : 'ledger-line';
+        const headClass = 'note-head' + (statusClass ? ' ' + statusClass : '');
+        const stemClass = 'note-stem' + (statusClass ? ' ' + statusClass : '');
+
+        if (needLedgerBelow || needLedgerAbove) {
+          const ledger = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          ledger.setAttribute('class', ledgerClass);
+          ledger.setAttribute('x1', x - NOTE_HEAD_W / 2 - 3);
+          ledger.setAttribute('y1', y);
+          ledger.setAttribute('x2', x + NOTE_HEAD_W / 2 + 3);
+          ledger.setAttribute('y2', y);
+          g.appendChild(ledger);
+        }
+        const head = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+        head.setAttribute('class', headClass);
+        head.setAttribute('cx', x);
+        head.setAttribute('cy', y);
+        head.setAttribute('rx', NOTE_HEAD_W / 2);
+        head.setAttribute('ry', NOTE_HEAD_H / 2);
+        g.appendChild(head);
+        const stemUp = midi < stemThresholdMidi;
+        const stemX = x + (stemUp ? NOTE_HEAD_W / 2 : -NOTE_HEAD_W / 2);
+        const stem = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        stem.setAttribute('class', stemClass);
+        stem.setAttribute('x1', stemX);
+        stem.setAttribute('y1', y);
+        stem.setAttribute('x2', stemX);
+        stem.setAttribute('y2', stemUp ? y - STEM_LEN : y + STEM_LEN);
+        g.appendChild(stem);
+      }
+
+      function renderSheetMusic() {
+        const wrap = document.getElementById('sheetMusicWrap');
+        const svg = document.getElementById('sheetMusicSvg');
+        if (!state.session || !svg) return;
+        const song = state.session.songs[state.songIndex];
+        const notes = song.notes;
+        const curIdx = state.autoPlayIntervalId ? (state.autoPlayNoteIndex >= 0 ? state.autoPlayNoteIndex : state.noteIndex) : state.noteIndex;
+        const start = Math.max(0, curIdx - 2);
+        const end = Math.min(notes.length, curIdx + 12);
+        const count = end - start;
+
+        let beatStart = 0;
+        for (let j = 0; j < start; j++) beatStart += notes[j].d;
+        let beatEnd = beatStart;
+        for (let j = start; j < end; j++) beatEnd += notes[j].d;
+        const totalBeats = beatEnd - beatStart;
+        const width = Math.max(380, STAFF_LEFT + CLEF_WIDTH + TIME_SIG_WIDTH + totalBeats * BEAT_WIDTH + 20);
+        const height = BASS_BOTTOM_Y + EXTRA_BELOW_BASS;
+        svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+        svg.setAttribute('preserveAspectRatio', 'xMinYMid meet');
+
+        let g = svg.querySelector('g.staff-group');
+        if (!g) {
+          g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          g.setAttribute('class', 'staff-group');
+          svg.appendChild(g);
+        }
+        g.innerHTML = '';
+
+        const noteAreaLeft = STAFF_LEFT + CLEF_WIDTH + TIME_SIG_WIDTH;
+        const staffRight = width - 12;
+
+        for (let s = 0; s < 2; s++) {
+          const staffTop = s === 0 ? TREBLE_TOP : BASS_TOP;
+          for (let i = 0; i < 5; i++) {
+            const y = staffTop + i * STAFF_LINE_SPACING;
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('class', 'staff-line');
+            line.setAttribute('x1', STAFF_LEFT);
+            line.setAttribute('y1', y);
+            line.setAttribute('x2', staffRight);
+            line.setAttribute('y2', y);
+            g.appendChild(line);
+          }
+        }
+
+        const brace = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        brace.setAttribute('fill', 'none');
+        brace.setAttribute('stroke', '#a8a29e');
+        brace.setAttribute('stroke-width', '1.2');
+        brace.setAttribute('d', 'M ' + (STAFF_LEFT + 1) + ' ' + (TREBLE_TOP - 1) + ' L ' + (STAFF_LEFT + 1) + ' ' + (BASS_BOTTOM_Y + 1) + ' Q ' + (STAFF_LEFT - 3) + ' ' + ((TREBLE_TOP + BASS_BOTTOM_Y) / 2) + ' ' + (STAFF_LEFT + 1) + ' ' + (TREBLE_TOP - 1));
+        g.appendChild(brace);
+
+        const trebleClef = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        trebleClef.setAttribute('fill', 'none');
+        trebleClef.setAttribute('stroke', '#a8a29e');
+        trebleClef.setAttribute('stroke-width', '1.2');
+        trebleClef.setAttribute('d', 'M 12 8 Q 22 12 14 28 Q 6 44 14 60 Q 22 76 12 88 M 16 8 L 16 88');
+        trebleClef.setAttribute('transform', 'translate(' + (STAFF_LEFT + 4) + ',' + (TREBLE_TOP - 8) + ') scale(0.48)');
+        g.appendChild(trebleClef);
+        const bassClef = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        bassClef.setAttribute('fill', 'none');
+        bassClef.setAttribute('stroke', '#a8a29e');
+        bassClef.setAttribute('stroke-width', '1.2');
+        bassClef.setAttribute('d', 'M 8 4 L 8 84 Q 20 84 24 44 Q 28 4 8 4 M 12 4 L 12 84 Q 22 84 24 52 Q 26 4 12 4');
+        bassClef.setAttribute('transform', 'translate(' + (STAFF_LEFT + 6) + ',' + (BASS_TOP - 4) + ') scale(0.38)');
+        g.appendChild(bassClef);
+
+        const timeSig = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        timeSig.setAttribute('x', STAFF_LEFT + CLEF_WIDTH + 4);
+        timeSig.setAttribute('y', TREBLE_TOP + STAFF_LINE_SPACING * 2 + 2);
+        timeSig.setAttribute('fill', '#a8a29e');
+        timeSig.setAttribute('font-size', '12');
+        timeSig.setAttribute('font-weight', 'bold');
+        timeSig.setAttribute('font-family', 'Georgia, serif');
+        timeSig.textContent = '4';
+        g.appendChild(timeSig);
+        const timeSig2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        timeSig2.setAttribute('x', STAFF_LEFT + CLEF_WIDTH + 4);
+        timeSig2.setAttribute('y', TREBLE_TOP + STAFF_LINE_SPACING * 4 + 2);
+        timeSig2.setAttribute('fill', '#a8a29e');
+        timeSig2.setAttribute('font-size', '12');
+        timeSig2.setAttribute('font-weight', 'bold');
+        timeSig2.setAttribute('font-family', 'Georgia, serif');
+        timeSig2.textContent = '4';
+        g.appendChild(timeSig2);
+
+        const barStartBeat = Math.floor(beatStart / BEATS_PER_BAR) * BEATS_PER_BAR;
+        const barEndBeat = Math.ceil(beatEnd / BEATS_PER_BAR) * BEATS_PER_BAR;
+        for (let b = barStartBeat; b <= barEndBeat; b += BEATS_PER_BAR) {
+          const bx = noteAreaLeft + (b - beatStart) * BEAT_WIDTH;
+          if (bx >= noteAreaLeft - 2 && bx <= staffRight + 2) {
+            const bar = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            bar.setAttribute('class', 'bar-line');
+            bar.setAttribute('x1', bx);
+            bar.setAttribute('y1', TREBLE_TOP - 4);
+            bar.setAttribute('x2', bx);
+            bar.setAttribute('y2', BASS_BOTTOM_Y + 4);
+            g.appendChild(bar);
+          }
+        }
+
+        let beatPos = beatStart;
+        let currentNoteX = null;
+        for (let i = start; i < end; i++) {
+          const n = notes[i];
+          const x = noteAreaLeft + (beatPos - beatStart) * BEAT_WIDTH + (n.d * BEAT_WIDTH) / 2;
+          let statusClass = '';
+          if (n.done) statusClass = 'done';
+          else if (n.wrong) statusClass = 'wrong';
+          else if (i === curIdx) {
+            statusClass = 'current';
+            currentNoteX = x;
+          }
+
+          drawNoteOnStaff(g, x, n.n, noteToStaffYTreble, 71, statusClass, 'treble');
+          if (n.left) drawNoteOnStaff(g, x, n.left, noteToStaffYBass, 48, statusClass, 'bass');
+          beatPos += n.d;
+        }
+
+        if (currentNoteX !== null) {
+          const playhead = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          playhead.setAttribute('class', 'playhead-line');
+          playhead.setAttribute('x1', currentNoteX);
+          playhead.setAttribute('y1', TREBLE_TOP - 4);
+          playhead.setAttribute('x2', currentNoteX);
+          playhead.setAttribute('y2', BASS_BOTTOM_Y + EXTRA_BELOW_BASS - 2);
+          g.appendChild(playhead);
+        }
+
+        const scrollTargetX = currentNoteX !== null ? currentNoteX - wrap.clientWidth / 2 : 0;
+        wrap.scrollLeft = Math.max(0, scrollTargetX);
+      }
+
+      function setKeyboardHighlight(handNotes) {
+        const wrap = document.getElementById('keyboardWrap');
+        if (!wrap) return;
+        wrap.querySelectorAll('.key').forEach(el => {
+          const n = el.dataset.note;
+          el.classList.remove('highlight-left', 'highlight-right');
+          if (handNotes && handNotes.left === n) el.classList.add('highlight-left');
+          if (handNotes && handNotes.right === n) el.classList.add('highlight-right');
+        });
+      }
+
+      function handNotesFromCur(cur) {
+        if (!cur) return null;
+        if (cur.left) return { right: cur.n, left: cur.left };
+        return { right: cur.n, left: null };
+      }
+
+      function renderKeyboard(handNotes) {
+        const wrap = document.getElementById('keyboard');
+        if (!wrap) return;
+        wrap.innerHTML = '';
+        const keys = allKeys(2, 37);
+        keys.forEach(k => {
+          const el = document.createElement('div');
+          el.className = 'key' + (k.black ? ' black' : '');
+          el.textContent = k.name.replace('#','♯');
+          el.dataset.note = k.name;
+          if (handNotes && handNotes.left === k.name) el.classList.add('highlight-left');
+          if (handNotes && handNotes.right === k.name) el.classList.add('highlight-right');
+          el.addEventListener('click', () => {
+            playNote(k.name, 200);
+            onKeyPress(k.name);
+          });
+          wrap.appendChild(el);
+        });
+      }
+
+      function onKeyPress(noteName) {
+        if (!state.session || state.songIndex >= state.session.songs.length) return;
+        const song = state.session.songs[state.songIndex];
+        const cur = song.notes[state.noteIndex];
+        if (!cur) return;
+        if (cur.n === noteName) {
+          cur.done = true;
+          cur.wrong = false;
+          state.noteIndex++;
+          state.listenFirstPlayed = false;
+          if (state.noteIndex >= song.notes.length) {
+            state.noteIndex = 0;
+            state.songIndex++;
+            if (state.songIndex >= state.session.songs.length) {
+              document.getElementById('doneSummary').textContent = 'You played ' + state.session.songs.length + ' pieces. Great focus!';
+              showScreen('done');
+            } else {
+              state.phraseStart = 0;
+              renderPlayScreen();
+            }
+          } else if (state.practiceMode && state.loopPhrase && state.noteIndex >= state.phraseStart + state.phraseLength) {
+            state.noteIndex = state.phraseStart;
+            for (let i = state.phraseStart; i < state.phraseStart + state.phraseLength && i < song.notes.length; i++) {
+              song.notes[i].done = false;
+              song.notes[i].wrong = false;
+            }
+            renderPlayScreen();
+          } else {
+            renderPlayScreen();
+          }
+        } else {
+          if (!cur.wrongCount) cur.wrongCount = 0;
+          cur.wrongCount++;
+          cur.wrong = true;
+          renderPlayScreen();
+        }
+      }
+
+      function setUseMic(on) {
+        state.useMic = on;
+        document.getElementById('modeTap').classList.toggle('active', !on);
+        document.getElementById('modeMic').classList.toggle('active', on);
+        const statusEl = document.getElementById('micStatus');
+        statusEl.style.display = on ? 'block' : 'none';
+        statusEl.classList.toggle('clickable', on);
+        if (!on) stopMic();
+        else if (!state.micStream) statusEl.textContent = 'Tap to enable microphone — then play the highlighted note on your piano.';
+      }
+
+      function setPracticeMode(on) {
+        state.practiceMode = on;
+        document.getElementById('practiceDetails').classList.toggle('visible', on);
+        if (on) state.listenFirstPlayed = false;
+      }
+
+      function playCurrentNoteForListenFirst() {
+        if (!state.session || state.songIndex >= state.session.songs.length) return;
+        const song = state.session.songs[state.songIndex];
+        const cur = song.notes[state.noteIndex];
+        if (!cur) return;
+        const durationMs = state.practiceSlow ? 800 : 400;
+        playNote(cur.n, durationMs);
+        state.listenFirstPlayed = true;
+      }
+
+      function stopAutoPlay() {
+        state.autoPlayTimeouts.forEach(id => clearTimeout(id));
+        state.autoPlayTimeouts = [];
+        if (state.autoPlayIntervalId) {
+          clearInterval(state.autoPlayIntervalId);
+          state.autoPlayIntervalId = null;
+        }
+        const btn = document.getElementById('playPieceBtn');
+        if (btn) btn.textContent = 'Play piece';
+        state.autoPlayNoteIndex = -1;
+        if (state.session && state.songIndex < state.session.songs.length) {
+          const song = state.session.songs[state.songIndex];
+          const cur = song.notes[state.noteIndex];
+          renderKeyboard(handNotesFromCur(cur));
+          renderSheetMusic();
+        }
+      }
+
+      function startAutoPlay() {
+        if (!state.session || state.songIndex >= state.session.songs.length) return;
+        stopAutoPlay();
+        const song = state.session.songs[state.songIndex];
+        const notes = song.notes;
+        const bpm = state.bpm;
+        const msPerQuarter = (60 * 1000) / bpm;
+        let totalBeats = 0;
+        for (let i = 0; i < notes.length; i++) totalBeats += notes[i].d;
+        const totalMs = totalBeats * msPerQuarter;
+        let lastPlayed = -1;
+        const startTime = Date.now();
+        state.autoPlayNoteIndex = -1;
+
+        state.autoPlayIntervalId = setInterval(() => {
+          const elapsed = Date.now() - startTime;
+          if (elapsed >= totalMs) {
+            stopAutoPlay();
+            return;
+          }
+          let t = 0;
+          for (let i = 0; i < notes.length; i++) {
+            if (i > lastPlayed && t <= elapsed) {
+              const note = notes[i];
+              const durationMs = Math.min(note.d * msPerQuarter, 2000);
+              state.autoPlayNoteIndex = i;
+              setKeyboardHighlight(note.left ? { right: note.n, left: note.left } : { right: note.n, left: null });
+              renderSheetMusic();
+              playNote(note.n, durationMs);
+              if (note.left) playNote(note.left, durationMs);
+              lastPlayed = i;
+            }
+            t += notes[i].d * msPerQuarter;
+          }
+        }, 80);
+        document.getElementById('playPieceBtn').textContent = 'Stop';
+      }
+
+      function renderPlayScreen() {
+        updateTempoUI();
+        const song = state.session.songs[state.songIndex];
+        document.getElementById('playSongTitle').textContent = song.title;
+        document.getElementById('playProgress').textContent = 'Song ' + (state.songIndex + 1) + ' of ' + state.session.songs.length;
+        setUseMic(state.useMic);
+        document.getElementById('practiceModeCheck').checked = state.practiceMode;
+        document.getElementById('practiceDetails').classList.toggle('visible', state.practiceMode);
+        document.getElementById('playbackNormal').classList.toggle('active', !state.practiceSlow);
+        document.getElementById('playbackSlow').classList.toggle('active', state.practiceSlow);
+        document.getElementById('phrase4').classList.toggle('active', state.phraseLength === 4);
+        document.getElementById('phrase8').classList.toggle('active', state.phraseLength === 8);
+        document.getElementById('loopPhraseCheck').checked = state.loopPhrase;
+        const strip = document.getElementById('notationStrip');
+        strip.innerHTML = '';
+        const start = Math.max(0, state.noteIndex - 2);
+        const end = Math.min(song.notes.length, state.noteIndex + 8);
+        for (let i = start; i < end; i++) {
+          const n = song.notes[i];
+          const chip = document.createElement('span');
+          chip.className = 'note-chip';
+          if (n.done) chip.classList.add('done');
+          else if (n.wrong) chip.classList.add('wrong');
+          else if (i === state.noteIndex) chip.classList.add('current');
+          chip.textContent = n.n.replace('#','♯');
+          strip.appendChild(chip);
+        }
+        const nextNote = song.notes[state.noteIndex];
+        renderSheetMusic();
+        renderKeyboard(handNotesFromCur(nextNote));
+        if (state.practiceMode && nextNote && !state.listenFirstPlayed) {
+          setTimeout(playCurrentNoteForListenFirst, 300);
+        }
+      }
+
+      function onPlayScreenLeave() {
+        stopMic();
+        stopAutoPlay();
+      }
+
+      function updateTempoUI() {
+        document.querySelectorAll('.tempo-btn').forEach(btn => {
+          btn.classList.toggle('active', parseInt(btn.dataset.bpm, 10) === state.bpm);
+        });
+        const ses = buildSession(state.bpm);
+        const el = document.getElementById('sessionEst');
+        if (el) el.textContent = '~' + ses.estMin + ' min session';
+      }
+
+      function renderSongList(genre) {
+        const list = document.getElementById('songList');
+        list.innerHTML = '';
+        const filtered = genre === 'all' ? SONGS : SONGS.filter(s => s.genre === genre);
+        filtered.forEach(song => {
+          const card = document.createElement('div');
+          card.className = 'song-card';
+          card.innerHTML = '<div><div class="title">' + song.title + '</div><div class="meta">~' + song.estMin + ' min</div></div><span class="genre-tag">' + song.genre + '</span>';
+          card.onclick = () => {
+            state.session = {
+              songs: [{
+                id: song.id,
+                title: song.title,
+                genre: song.genre,
+                estMin: song.estMin,
+                notes: song.notes.map(n => ({ n: n.n, d: n.d, left: n.left, done: false, wrong: false }))
+              }],
+              estMin: song.estMin
+            };
+            state.songIndex = 0;
+            state.noteIndex = 0;
+            showScreen('play');
+            renderPlayScreen();
+          };
+          list.appendChild(card);
+        });
+      }
+
+      document.getElementById('backBtn').onclick = () => {
+        if (getScreen('play').classList.contains('active')) { onPlayScreenLeave(); showScreen('home'); }
+        else if (getScreen('done').classList.contains('active')) showScreen('home');
+        else if (window.parent !== window) try { window.parent.postMessage({ type: 'chore-stars-back' }, '*'); } catch (_) {}
+        else window.history.back();
+      };
+
+      document.querySelectorAll('.tempo-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.bpm = parseInt(btn.dataset.bpm, 10);
+          updateTempoUI();
+        });
+      });
+
+      document.getElementById('startSessionBtn').onclick = () => {
+        state.session = buildSession(state.bpm);
+        state.songIndex = 0;
+        state.noteIndex = 0;
+        state.session.songs.forEach(s => s.notes.forEach(n => { n.done = false; n.wrong = false; }));
+        showScreen('play');
+        renderPlayScreen();
+      };
+
+      document.querySelectorAll('.genre-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.genre-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          renderSongList(tab.dataset.genre);
+        });
+      });
+
+      document.getElementById('prevSongBtn').onclick = () => {
+        if (state.songIndex > 0) {
+          state.songIndex--;
+          state.noteIndex = 0;
+          state.session.songs[state.songIndex].notes.forEach(n => { n.done = false; n.wrong = false; });
+          renderPlayScreen();
+        }
+      };
+      document.getElementById('nextSongBtn').onclick = () => {
+        if (state.songIndex < state.session.songs.length - 1) {
+          state.songIndex++;
+          state.noteIndex = 0;
+          state.session.songs[state.songIndex].notes.forEach(n => { n.done = false; n.wrong = false; });
+          renderPlayScreen();
+        } else {
+          document.getElementById('doneSummary').textContent = 'You played ' + state.session.songs.length + ' pieces. Great focus!';
+          showScreen('done');
+        }
+      };
+
+      document.getElementById('doneHomeBtn').onclick = () => showScreen('home');
+
+      document.getElementById('modeTap').onclick = () => setUseMic(false);
+      document.getElementById('modeMic').onclick = () => setUseMic(true);
+
+      document.getElementById('practiceModeCheck').onchange = function() {
+        setPracticeMode(this.checked);
+        if (state.practiceMode) state.listenFirstPlayed = false;
+        renderPlayScreen();
+      };
+      document.getElementById('playbackNormal').onclick = () => { state.practiceSlow = false; renderPlayScreen(); };
+      document.getElementById('playbackSlow').onclick = () => { state.practiceSlow = true; renderPlayScreen(); };
+      document.getElementById('phrase4').onclick = () => { state.phraseLength = 4; renderPlayScreen(); };
+      document.getElementById('phrase8').onclick = () => { state.phraseLength = 8; renderPlayScreen(); };
+      document.getElementById('loopPhraseCheck').onchange = function() { state.loopPhrase = this.checked; };
+      document.getElementById('nextPhraseBtn').onclick = () => {
+        state.phraseStart = state.noteIndex;
+        state.listenFirstPlayed = false;
+        playCurrentNoteForListenFirst();
+      };
+      document.getElementById('playAgainBtn').onclick = () => playCurrentNoteForListenFirst();
+
+      document.getElementById('playPieceBtn').onclick = () => {
+        if (state.autoPlayIntervalId) stopAutoPlay();
+        else startAutoPlay();
+      };
+
+      document.getElementById('micStatus').onclick = () => {
+        if (!state.useMic) return;
+        if (state.micStream) stopMic();
+        else startMic();
+      };
+
+      updateTempoUI();
+      renderSongList('all');
+    })();
+  </script>
+</body>
+</html>

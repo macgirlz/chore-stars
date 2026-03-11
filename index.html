@@ -545,6 +545,17 @@ nav{
         <button class="game-play-btn">Play ▶</button>
       </div>
     </div>
+    <div class="game-card" onclick="openGame('piano-genie')">
+      <div class="game-card-bg" style="background:linear-gradient(135deg,#4c1d95,#6d28d9,#7c3aed)"></div>
+      <div class="game-card-content">
+        <div class="game-emoji-bubble">🎹</div>
+        <div class="game-info">
+          <div class="game-title">Piano Genie</div>
+          <div class="game-desc">20–30 min sessions: classical, pop &amp; Disney with adjustable tempo!</div>
+        </div>
+        <button class="game-play-btn">Play ▶</button>
+      </div>
+    </div>
   </section>
 
   <!-- CALENDAR -->
@@ -1151,8 +1162,8 @@ function navigate(view) {
 }
 
 function openGame(game) {
-  const titles = { 'word-wizard': '🔤 Word Wizard', 'sudoku': '🔢 Sudoku', 'puzzle': '🧩 Picture Puzzles', 'math-camp': '🏕️ Math Camp' };
-  const files  = { 'word-wizard': 'word-wizard.html', 'sudoku': 'sudoku.html', 'puzzle': 'puzzle.html', 'math-camp': 'math-camp.html' };
+  const titles = { 'word-wizard': '🔤 Word Wizard', 'sudoku': '🔢 Sudoku', 'puzzle': '🧩 Picture Puzzles', 'math-camp': '🏕️ Math Camp', 'piano-genie': '🎹 Piano Genie' };
+  const files  = { 'word-wizard': 'word-wizard.html', 'sudoku': 'sudoku.html', 'puzzle': 'puzzle.html', 'math-camp': 'math-camp.html', 'piano-genie': 'piano.html' };
   document.getElementById('game-overlay-title').textContent = titles[game] || game;
   document.getElementById('game-iframe').src = files[game];
   document.getElementById('game-overlay').classList.add('open');
