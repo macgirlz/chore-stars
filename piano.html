@@ -8,17 +8,17 @@
     :root {
       --bg: #0f0f14;
       --card: #1a1a22;
-      --accent: #a78bfa;
-      --accent-dim: #7c3aed;
+      --accent: #60a5fa;
+      --accent-dim: #1d4ed8;
       --text: #e2e8f0;
       --muted: #94a3b8;
-      --green: #34d399;
+      --green: #22c55e;
       --red: #f87171;
       --radius: 16px;
-      --left-hand: #a855f7;
-      --left-hand-dim: #7e22ce;
-      --right-hand: #f97316;
-      --right-hand-dim: #ea580c;
+      --left-hand: #0ea5e9;
+      --left-hand-dim: #0369a1;
+      --right-hand: #3b82f6;
+      --right-hand-dim: #1d4ed8;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     body {
@@ -30,12 +30,12 @@
     }
 
     .top-bar {
-      background: linear-gradient(135deg, #4c1d95, #6d28d9);
+      background: linear-gradient(135deg, #0f172a, #1e3a8a);
       padding: 14px 16px;
       display: flex;
       align-items: center;
       gap: 10px;
-      box-shadow: 0 2px 16px rgba(76,29,149,.4);
+      box-shadow: 0 2px 16px rgba(29,78,216,.35);
     }
     .back-btn {
       border: none;
@@ -53,11 +53,12 @@
     .screen { display: none; min-height: 100vh; flex-direction: column; }
     .screen.active { display: flex; }
 
-    .scroll { flex: 1; overflow-y: auto; padding: 18px 16px; }
+    .scroll { flex: 1; overflow-y: auto; padding: 14px 16px; }
+    #screen-play .scroll { padding-bottom: 20px; }
 
     /* Home */
     .hero {
-      background: linear-gradient(145deg, #4c1d95 0%, #6d28d9 50%, #7c3aed 100%);
+      background: linear-gradient(145deg, #0f172a 0%, #1e3a8a 50%, #1d4ed8 100%);
       border-radius: 24px;
       padding: 28px 20px;
       color: #fff;
@@ -95,7 +96,7 @@
       margin: 20px auto 0;
       padding: 16px 24px;
       background: #fff;
-      color: #6d28d9;
+      color: #1d4ed8;
       border: none;
       border-radius: 16px;
       font-size: 1.05rem;
@@ -117,7 +118,7 @@
       font-size: .85rem;
       cursor: pointer;
     }
-    .genre-tab.active { border-color: var(--accent); color: var(--accent); background: rgba(167,139,250,.1); }
+    .genre-tab.active { border-color: var(--accent); color: var(--accent); background: rgba(59,130,246,.1); }
     .song-card {
       background: var(--card);
       border-radius: var(--radius);
@@ -132,54 +133,59 @@
     .song-card:hover { border-color: var(--accent-dim); }
     .song-card .title { font-weight: 700; font-size: 1rem; }
     .song-card .meta { font-size: .8rem; color: var(--muted); margin-top: 2px; }
-    .song-card .genre-tag { font-size: .7rem; padding: 4px 8px; border-radius: 8px; background: rgba(167,139,250,.2); color: var(--accent); font-weight: 700; }
+    .song-card .genre-tag { font-size: .7rem; padding: 4px 8px; border-radius: 8px; background: rgba(59,130,246,.2); color: var(--accent); font-weight: 700; }
 
     /* Session / Play */
     .session-header {
       background: var(--card);
       border-radius: var(--radius);
-      padding: 14px 16px;
-      margin-bottom: 16px;
+      padding: 10px 14px;
+      margin-bottom: 12px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 8px;
     }
-    .session-song-title { font-weight: 800; font-size: 1.05rem; }
-    .session-progress { font-size: .8rem; color: var(--muted); }
+    .session-song-title { font-weight: 800; font-size: 1rem; }
+    .session-progress { font-size: .78rem; color: var(--muted); }
+    .session-header .tempo-row { margin-top: 0; }
+    .strips-container {
+      width: 100%;
+      min-width: 100%;
+    }
     .sheet-music-wrap {
-      background: #1c1917;
+      width: 100%;
+      background: #ffffff;
       border-radius: 12px;
       padding: 14px 16px;
       margin-bottom: 12px;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
-      max-height: 200px;
+      box-sizing: border-box;
+      border: 1px solid rgba(0,0,0,.08);
     }
     .sheet-music-wrap svg {
       display: block;
-      min-width: 100%;
-      max-height: 172px;
       width: 100%;
-      height: auto;
+      height: 230px;
     }
-    .staff-line { stroke: #a8a29e; stroke-width: 1.4; }
-    .bar-line { stroke: #a8a29e; stroke-width: 1.8; }
-    .playhead-line { stroke: #facc15; stroke-width: 2.5; opacity: 0.9; }
-    .note-head { fill: #57534e; stroke: none; }
-    .note-head.current { fill: #facc15; stroke: #ca8a04; stroke-width: 2; }
-    .note-head.done { fill: #3b82f6; stroke: #2563eb; }
-    .note-head.wrong { fill: #ef4444; stroke: #dc2626; }
-    .note-stem { stroke: #57534e; stroke-width: 1.5; }
-    .note-stem.current { stroke: #ca8a04; }
-    .note-stem.done { stroke: #2563eb; }
-    .note-stem.wrong { stroke: #dc2626; }
-    .ledger-line { stroke: #57534e; stroke-width: 1.2; }
-    .ledger-line.current { stroke: #ca8a04; }
-    .ledger-line.done { stroke: #2563eb; }
-    .ledger-line.wrong { stroke: #dc2626; }
-    .clef-symbol { fill: var(--text); font-family: Georgia, serif; font-size: 48px; }
+    .staff-line { stroke: #374151; stroke-width: 1.4; }
+    .bar-line { stroke: #374151; stroke-width: 1.8; }
+    .playhead-line { stroke: #3b82f6; stroke-width: 3; opacity: 0.85; }
+    .note-head { fill: #1e293b; stroke: none; }
+    .note-head.current { fill: #3b82f6; stroke: #1d4ed8; stroke-width: 1.5; }
+    .note-head.done { fill: #16a34a; stroke: #15803d; stroke-width: 1; }
+    .note-head.wrong { fill: #dc2626; stroke: #b91c1c; stroke-width: 1; }
+    .note-stem { stroke: #1e293b; stroke-width: 1.5; }
+    .note-stem.current { stroke: #1d4ed8; }
+    .note-stem.done { stroke: #15803d; }
+    .note-stem.wrong { stroke: #b91c1c; }
+    .ledger-line { stroke: #374151; stroke-width: 1.2; }
+    .ledger-line.current { stroke: #1d4ed8; }
+    .ledger-line.done { stroke: #15803d; }
+    .ledger-line.wrong { stroke: #b91c1c; }
+    .clef-symbol { fill: #1e293b; font-family: Georgia, serif; font-size: 48px; }
     .notation-strip {
       background: var(--card);
       border-radius: var(--radius);
@@ -197,44 +203,61 @@
       border-radius: 12px;
       font-weight: 800;
       font-size: 1rem;
-      background: rgba(167,139,250,.15);
+      background: rgba(96,165,250,.12);
       color: var(--accent);
       border: 2px solid transparent;
     }
-    .note-chip.current { border-color: var(--accent); background: rgba(167,139,250,.3); box-shadow: 0 0 0 3px rgba(167,139,250,.2); }
-    .note-chip.done { background: rgba(52,211,153,.2); color: var(--green); border-color: var(--green); }
+    .note-chip.current { border-color: var(--accent); background: rgba(59,130,246,.25); box-shadow: 0 0 0 3px rgba(59,130,246,.2); }
+    .note-chip.done { background: rgba(34,197,94,.15); color: var(--green); border-color: var(--green); }
     .note-chip.wrong { background: rgba(248,113,113,.2); color: var(--red); border-color: var(--red); }
     .keyboard-wrap {
+      width: 100%;
       background: var(--card);
-      border-radius: var(--radius);
-      padding: 12px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      padding: 10px 16px;
+      padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
+      flex-shrink: 0;
+    }
+    .current-note-badge {
+      text-align: center;
+      font-size: .75rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 8px;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+    .current-note-badge .note-name {
+      color: #3b82f6;
+      font-size: 1.2rem;
+      font-weight: 900;
+      letter-spacing: 1px;
     }
     .keyboard-legend {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: .7rem;
+      font-size: .68rem;
       font-weight: 700;
       color: var(--muted);
       margin-bottom: 6px;
-      padding: 0 4px;
+      padding: 0 2px;
     }
     .keyboard-legend .left-label { color: var(--left-hand); }
     .keyboard-legend .middle-c-label { color: var(--muted); }
     .keyboard-legend .right-label { color: var(--right-hand); }
     .keyboard {
       display: flex;
-      height: 100px;
-      min-width: min(100%, 720px);
+      height: 130px;
+      width: 100%;
       position: relative;
-      margin: 0 auto;
     }
     .key {
       flex: 1;
-      min-width: 28px;
-      max-width: 44px;
+      min-width: 18px;
+      max-width: 38px;
       border-radius: 0 0 6px 6px;
       border: 1px solid #444;
       cursor: pointer;
@@ -243,7 +266,7 @@
       align-items: flex-end;
       justify-content: center;
       padding-bottom: 6px;
-      font-size: .6rem;
+      font-size: .55rem;
       font-weight: 800;
       color: #475569;
       user-select: none;
@@ -252,17 +275,19 @@
     .key.black {
       background: linear-gradient(180deg, #334155 0%, #1e293b 100%);
       color: #94a3b8;
-      min-width: 18px;
-      max-width: 28px;
-      margin-left: -10px;
-      margin-right: -10px;
+      min-width: 12px;
+      max-width: 24px;
+      margin-left: -7px;
+      margin-right: -7px;
       z-index: 1;
-      height: 75%;
+      height: 72%;
+      padding-bottom: 4px;
+      font-size: .5rem;
     }
-    .key.highlight-left { background: linear-gradient(180deg, #c084fc 0%, var(--left-hand) 100%); color: #fff; box-shadow: inset 0 0 0 2px var(--left-hand-dim); border-color: var(--left-hand-dim); }
-    .key.black.highlight-left { background: linear-gradient(180deg, var(--left-hand-dim) 0%, #581c87 100%); color: #e9d5ff; }
-    .key.highlight-right { background: linear-gradient(180deg, #fdba74 0%, var(--right-hand) 100%); color: #fff; box-shadow: inset 0 0 0 2px var(--right-hand-dim); border-color: var(--right-hand-dim); }
-    .key.black.highlight-right { background: linear-gradient(180deg, var(--right-hand-dim) 0%, #c2410c 100%); color: #ffedd5; }
+    .key.highlight-left { background: linear-gradient(180deg, #38bdf8 0%, var(--left-hand) 100%); color: #fff; box-shadow: inset 0 0 0 2px var(--left-hand-dim); border-color: var(--left-hand-dim); }
+    .key.black.highlight-left { background: linear-gradient(180deg, var(--left-hand-dim) 0%, #075985 100%); color: #e0f2fe; }
+    .key.highlight-right { background: linear-gradient(180deg, #93c5fd 0%, var(--right-hand) 100%); color: #fff; box-shadow: inset 0 0 0 2px var(--right-hand-dim); border-color: var(--right-hand-dim); }
+    .key.black.highlight-right { background: linear-gradient(180deg, var(--right-hand-dim) 0%, #1e3a8a 100%); color: #dbeafe; }
     .key:active { transform: scale(0.97); }
     .mode-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
     .mode-btn {
@@ -275,7 +300,7 @@
       font-size: .85rem;
       cursor: pointer;
     }
-    .mode-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(167,139,250,.15); }
+    .mode-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(59,130,246,.12); }
     .mic-status {
       padding: 10px 14px;
       border-radius: 12px;
@@ -298,9 +323,55 @@
     .practice-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
     .small-btn { padding: 6px 12px; border-radius: 8px; border: 2px solid var(--card); background: var(--card); color: var(--text); font-size: .8rem; font-weight: 600; cursor: pointer; }
     .small-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .small-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(167,139,250,.15); }
+    .small-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(59,130,246,.12); }
     .loop-label { display: flex; align-items: center; gap: 6px; font-size: .85rem; color: var(--text); cursor: pointer; }
     .loop-label input { width: 16px; height: 16px; }
+    .session-header .tempo-btn { padding: 6px 12px; font-size: .8rem; border-radius: 10px; }
+    .hand-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .hand-label { font-size: .78rem; font-weight: 700; color: var(--muted); white-space: nowrap; }
+
+    /* Score overlay */
+    .score-overlay {
+      display: none;
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(0,0,0,.72);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .score-overlay.visible { display: flex; }
+    .score-card {
+      background: var(--card);
+      border-radius: 24px;
+      padding: 32px 28px;
+      text-align: center;
+      max-width: 320px;
+      width: 100%;
+      box-shadow: 0 24px 64px rgba(0,0,0,.6);
+      animation: scoreIn .28s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes scoreIn {
+      from { transform: scale(.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .score-medal-icon { font-size: 3.8rem; margin-bottom: 6px; }
+    .score-pct { font-size: 3rem; font-weight: 900; color: var(--text); line-height: 1; }
+    .score-medal-label { font-size: 1.05rem; font-weight: 800; margin: 6px 0 2px; }
+    .score-medal-label.gold { color: #f59e0b; }
+    .score-medal-label.silver { color: #94a3b8; }
+    .score-medal-label.bronze { color: #d97706; }
+    .score-medal-label.none { color: var(--muted); }
+    .score-song-title { font-size: .85rem; color: var(--muted); margin-bottom: 4px; }
+    .score-detail { font-size: .82rem; color: var(--muted); margin-bottom: 22px; }
+    .score-best { font-size: .75rem; color: var(--accent); font-weight: 700; margin-bottom: 16px; }
+    .score-buttons { display: flex; gap: 10px; justify-content: center; }
+    .score-buttons .btn-primary { margin: 0; width: auto; font-size: .9rem; padding: 12px 22px; }
+
+    /* Best score badge on song cards */
+    .song-score { display: flex; align-items: center; gap: 6px; }
+    .song-medal { font-size: .95rem; }
+    .song-score-pct { font-size: .72rem; font-weight: 700; color: var(--muted); }
+
     .controls-row { display: flex; gap: 10px; margin-top: 16px; justify-content: center; flex-wrap: wrap; }
     .btn-secondary {
       padding: 12px 20px;
@@ -314,7 +385,7 @@
     }
     .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
     .session-done-card {
-      background: linear-gradient(145deg, #4c1d95, #6d28d9);
+      background: linear-gradient(145deg, #0f172a, #1e3a8a);
       border-radius: 24px;
       padding: 32px 24px;
       text-align: center;
@@ -336,7 +407,7 @@
     <div class="scroll">
       <div class="hero">
         <h1>🎹 Piano Genie</h1>
-        <p>20–30 min sessions • Classical, Pop & Disney</p>
+        <p>Classical, Pop & Disney themes</p>
         <div class="tempo-row">
           <span class="tempo-label">Tempo:</span>
           <button class="tempo-btn" data-bpm="60">60 BPM</button>
@@ -345,7 +416,7 @@
           <button class="tempo-btn" data-bpm="120">120 BPM</button>
         </div>
         <div class="session-est" id="sessionEst">~25 min session</div>
-        <button class="btn-primary" id="startSessionBtn">Start 20–30 min Session</button>
+        <button class="btn-primary" id="startSessionBtn">Start Session</button>
       </div>
       <div class="section-label">Browse by genre</div>
       <div class="genre-tabs">
@@ -378,6 +449,12 @@
         <button class="mode-btn active" id="modeTap">Tap keys</button>
         <button class="mode-btn" id="modeMic">Use microphone</button>
       </div>
+      <div class="hand-row">
+        <span class="hand-label">Hands:</span>
+        <button class="mode-btn active" id="handBoth">Both</button>
+        <button class="mode-btn" id="handRight">Right only</button>
+        <button class="mode-btn" id="handLeft">Left only</button>
+      </div>
       <div class="practice-opts" id="practiceOpts">
         <label class="practice-toggle"><input type="checkbox" id="practiceModeCheck"> Practice mode</label>
         <div class="practice-details" id="practiceDetails">
@@ -399,21 +476,38 @@
         </div>
       </div>
       <div class="mic-status" id="micStatus" style="display:none" title="Tap to enable">Tap to enable microphone — then play the highlighted note on your piano.</div>
-      <div class="sheet-music-wrap" id="sheetMusicWrap">
-        <svg id="sheetMusicSvg" viewBox="0 0 400 100" preserveAspectRatio="xMidYMid meet"></svg>
-      </div>
-      <div class="notation-strip" id="notationStrip"></div>
-      <div class="keyboard-wrap" id="keyboardWrap">
-        <div class="keyboard-legend">
-          <span class="left-label">← Left hand (bass)</span>
-          <span class="middle-c-label">Middle C</span>
-          <span class="right-label">Right hand (melody) →</span>
+      <div class="strips-container">
+        <div class="sheet-music-wrap" id="sheetMusicWrap">
+          <svg id="sheetMusicSvg" viewBox="0 0 400 100" preserveAspectRatio="none"></svg>
         </div>
-        <div class="keyboard" id="keyboard"></div>
+        <div class="notation-strip" id="notationStrip"></div>
       </div>
       <div class="controls-row">
         <button class="btn-secondary" id="prevSongBtn">← Prev song</button>
         <button class="btn-secondary" id="nextSongBtn">Next song →</button>
+      </div>
+    </div>
+    <div class="keyboard-wrap" id="keyboardWrap">
+      <div class="current-note-badge">Play: <span class="note-name" id="currentNoteLabel">—</span></div>
+      <div class="keyboard-legend">
+        <span class="left-label">← Left hand (bass)</span>
+        <span class="middle-c-label">Middle C</span>
+        <span class="right-label">Right hand (melody) →</span>
+      </div>
+      <div class="keyboard" id="keyboard"></div>
+    </div>
+    <div class="score-overlay" id="scoreOverlay">
+      <div class="score-card">
+        <div class="score-medal-icon" id="scoreMedalIcon">🎵</div>
+        <div class="score-pct" id="scorePct">—</div>
+        <div class="score-medal-label" id="scoreMedalLabel">Score</div>
+        <div class="score-song-title" id="scoreSongTitle"></div>
+        <div class="score-detail" id="scoreDetail"></div>
+        <div class="score-best" id="scoreBest"></div>
+        <div class="score-buttons">
+          <button class="btn-secondary" id="scoreTryAgainBtn">Try again</button>
+          <button class="btn-primary" id="scoreNextBtn">Next →</button>
+        </div>
       </div>
     </div>
   </div>
@@ -431,8 +525,7 @@
 
   <script>
     (function() {
-      const SESSION_TARGET_MIN = 20;
-      const SESSION_TARGET_MAX = 30;
+      const SESSION_SONG_COUNT = 5; // songs per session
 
       const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
       function noteToMidi(name) {
@@ -450,24 +543,145 @@
         return NOTES[i] + oct;
       }
 
+      /* ── Song timing helpers ── */
+      function songBeats(notes) {
+        return notes.reduce((s, n) => s + n.d, 0);
+      }
+      function songPlayMs(notes, bpm) {
+        return songBeats(notes) * (60000 / bpm);
+      }
+      function fmtDuration(ms) {
+        const s = Math.round(ms / 1000);
+        if (s < 60) return s + 's';
+        const m = Math.floor(s / 60), rem = s % 60;
+        return rem > 0 ? m + 'm ' + rem + 's' : m + 'm';
+      }
+
+      /* ── Scoring (localStorage) ── */
+      const SCORES_KEY = 'piano_scores';
+      function loadScores() {
+        try { return JSON.parse(localStorage.getItem(SCORES_KEY) || '{}'); } catch(_) { return {}; }
+      }
+      function saveScore(songId, pct) {
+        const scores = loadScores();
+        const medal = pct >= 96 ? 'gold' : pct >= 90 ? 'silver' : pct >= 80 ? 'bronze' : null;
+        const isNew = !scores[songId] || pct > (scores[songId].pct || 0);
+        if (isNew) scores[songId] = { pct, medal };
+        localStorage.setItem(SCORES_KEY, JSON.stringify(scores));
+        return { pct, medal, isNew, best: scores[songId] };
+      }
+      function medalEmoji(medal) {
+        return medal === 'gold' ? '🥇' : medal === 'silver' ? '🥈' : medal === 'bronze' ? '🥉' : '🎵';
+      }
+
+      /* ── Hand mode helpers ── */
+      function noteRequiredForHand(note) {
+        return state.handMode === 'left' ? !!note.left : true;
+      }
+      function targetNoteForHand(note) {
+        return state.handMode === 'left' ? note.left : note.n;
+      }
+      function advancePastSkipped(song) {
+        while (state.noteIndex < song.notes.length && !noteRequiredForHand(song.notes[state.noteIndex])) {
+          song.notes[state.noteIndex].done = true;
+          state.noteIndex++;
+        }
+      }
+
       const SONGS = [
-        { id: 'fur-elise', title: 'Für Elise (theme)', genre: 'classical', estMin: 1.5, notes: [
-          { n: 'E5', d: 0.5 },{ n: 'D#5', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'D#5', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'B4', d: 0.5 },{ n: 'D5', d: 0.5 },{ n: 'C5', d: 0.5 },
-          { n: 'A4', d: 1 },{ n: 'C4', d: 0.5 },{ n: 'E4', d: 0.5 },{ n: 'A4', d: 0.5 },{ n: 'B4', d: 1 },{ n: 'E4', d: 0.5 },{ n: 'G#4', d: 0.5 },{ n: 'B4', d: 0.5 },{ n: 'C5', d: 1 }
+        { id: 'fur-elise', title: 'Für Elise', genre: 'classical', notes: [
+          // Section A — pickup + main motif (bars 1-14, volta 1)
+          { n: 'E5', d: 0.5 },
+          { n: 'D#5', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'D#5', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'B4', d: 0.5 },{ n: 'D5', d: 0.5 },{ n: 'C5', d: 0.5 },
+          { n: 'A4', d: 1, left: 'A2' },{ n: 'C4', d: 0.5 },{ n: 'E4', d: 0.5 },{ n: 'A4', d: 0.5 },
+          { n: 'B4', d: 1, left: 'E2' },{ n: 'E4', d: 0.5 },{ n: 'G#4', d: 0.5 },{ n: 'B4', d: 0.5 },
+          { n: 'C5', d: 1, left: 'A2' },{ n: 'E4', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'D#5', d: 0.5 },
+          { n: 'E5', d: 0.5 },{ n: 'D#5', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'B4', d: 0.5 },{ n: 'D5', d: 0.5 },{ n: 'C5', d: 0.5 },
+          { n: 'A4', d: 1, left: 'A2' },{ n: 'C4', d: 0.5 },{ n: 'E4', d: 0.5 },{ n: 'A4', d: 0.5 },
+          { n: 'B4', d: 1, left: 'E2' },{ n: 'E4', d: 0.5 },{ n: 'C5', d: 0.5 },{ n: 'B4', d: 0.5 },
+          { n: 'A4', d: 2, left: 'A2' },
+          // Section A — volta 2 ending leading into B
+          { n: 'A4', d: 1, left: 'A2' },{ n: 'B4', d: 0.5 },{ n: 'C5', d: 0.5 },{ n: 'D5', d: 0.5 },
+          // Section B — flowing melody (bars 23-38)
+          { n: 'E5', d: 1.5, left: 'C3' },{ n: 'G4', d: 0.5 },{ n: 'F5', d: 0.5 },{ n: 'E5', d: 0.5 },
+          { n: 'D5', d: 1.5, left: 'G2' },{ n: 'F4', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'D5', d: 0.5 },
+          { n: 'C5', d: 1.5, left: 'A2' },{ n: 'E4', d: 0.5 },{ n: 'D5', d: 0.5 },{ n: 'C5', d: 0.5 },
+          { n: 'B4', d: 1, left: 'E2' },{ n: 'E4', d: 0.5 },{ n: 'E5', d: 0.5 },
+          { n: 'E5', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'D#5', d: 0.5 },
+          { n: 'E5', d: 1 },{ n: 'D#5', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'D#5', d: 0.5 },
+          { n: 'E5', d: 0.5 },{ n: 'D#5', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'B4', d: 0.5 },{ n: 'D5', d: 0.5 },{ n: 'C5', d: 0.5 },
+          { n: 'A4', d: 1, left: 'A2' },{ n: 'C4', d: 0.5 },{ n: 'E4', d: 0.5 },{ n: 'A4', d: 0.5 },
+          { n: 'B4', d: 1, left: 'E2' },{ n: 'E4', d: 0.5 },{ n: 'G#4', d: 0.5 },{ n: 'B4', d: 0.5 },
+          { n: 'C5', d: 1, left: 'A2' },{ n: 'E4', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'D#5', d: 0.5 },
+          { n: 'E5', d: 0.5 },{ n: 'D#5', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'B4', d: 0.5 },{ n: 'D5', d: 0.5 },{ n: 'C5', d: 0.5 },
+          { n: 'A4', d: 1, left: 'A2' },{ n: 'C4', d: 0.5 },{ n: 'E4', d: 0.5 },{ n: 'A4', d: 0.5 },
+          { n: 'B4', d: 1, left: 'E2' },{ n: 'E4', d: 0.5 },{ n: 'C5', d: 0.5 },{ n: 'B4', d: 0.5 },
+          // B section volta 2 ending
+          { n: 'A4', d: 1, left: 'A2' },{ n: 'C5', d: 0.5 },{ n: 'C5', d: 0.5 },{ n: 'C5', d: 0.5 },
+          // Middle C section — arpeggios (bars 39-58)
+          { n: 'C5', d: 2, left: 'F3' },{ n: 'F5', d: 0.5 },{ n: 'E5', d: 0.25 },
+          { n: 'E5', d: 1, left: 'F3' },{ n: 'D5', d: 1 },
+          { n: 'A#5', d: 0.5 },{ n: 'A5', d: 0.25 },{ n: 'A5', d: 0.5 },{ n: 'G5', d: 0.5 },{ n: 'F5', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'D5', d: 0.5 },{ n: 'C5', d: 0.5 },
+          { n: 'A#4', d: 1, left: 'F3' },{ n: 'A4', d: 1 },
+          { n: 'A4', d: 0.25 },{ n: 'G4', d: 0.25 },{ n: 'A4', d: 0.25 },{ n: 'A#4', d: 0.25 },
+          { n: 'C5', d: 2, left: 'F3' },{ n: 'D5', d: 0.5 },{ n: 'D#5', d: 0.5 },
+          { n: 'E5', d: 1.5, left: 'E3' },{ n: 'E5', d: 0.5 },{ n: 'F5', d: 0.5 },{ n: 'A4', d: 0.5 },
+          { n: 'C5', d: 2, left: 'E3' },{ n: 'D5', d: 0.5 },{ n: 'B4', d: 0.25 },
+          // Arpeggio runs (32nd notes)
+          { n: 'C5', d: 0.25 },{ n: 'G5', d: 0.25 },{ n: 'A4', d: 0.25 },{ n: 'G5', d: 0.25 },
+          { n: 'C5', d: 0.25 },{ n: 'D5', d: 0.25 },{ n: 'E5', d: 0.25 },{ n: 'C5', d: 0.25 },
+          { n: 'A5', d: 0.25 },{ n: 'F5', d: 0.25 },{ n: 'D5', d: 0.25 },{ n: 'F5', d: 0.25 },
+          { n: 'C5', d: 0.25 },{ n: 'G5', d: 0.25 },{ n: 'A4', d: 0.25 },{ n: 'G5', d: 0.25 },
+          { n: 'C5', d: 0.25 },{ n: 'D5', d: 0.25 },{ n: 'E5', d: 0.25 },{ n: 'C5', d: 0.25 },
+          { n: 'A5', d: 0.25 },{ n: 'F5', d: 0.25 },{ n: 'D5', d: 0.25 },{ n: 'F5', d: 0.25 },
+          // E-Eb-E trills and motif buildup
+          { n: 'E5', d: 0.25 },{ n: 'F5', d: 0.25 },{ n: 'E5', d: 0.25 },{ n: 'D#5', d: 0.25 },
+          { n: 'E5', d: 0.25 },{ n: 'B4', d: 0.25 },{ n: 'E5', d: 0.25 },{ n: 'D#5', d: 0.25 },
+          { n: 'E5', d: 0.25 },{ n: 'B4', d: 0.25 },{ n: 'E5', d: 0.25 },{ n: 'D#5', d: 0.25 },
+          { n: 'E5', d: 1.5 },{ n: 'B4', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'D#5', d: 0.5 },
+          { n: 'E5', d: 1.5 },{ n: 'B4', d: 0.5 },{ n: 'E5', d: 0.5 },
+          { n: 'D#5', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'D#5', d: 0.5 },
+          { n: 'E5', d: 0.5 },{ n: 'D#5', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'D#5', d: 0.5 },
+          { n: 'E5', d: 0.5 },{ n: 'B4', d: 0.5 },{ n: 'D5', d: 0.5 },{ n: 'C5', d: 0.5 },
+          // Section A return (bars 64-83)
+          { n: 'A4', d: 1, left: 'A2' },{ n: 'C4', d: 0.5 },{ n: 'E4', d: 0.5 },{ n: 'A4', d: 0.5 },
+          { n: 'B4', d: 1, left: 'E2' },{ n: 'E4', d: 0.5 },{ n: 'G#4', d: 0.5 },{ n: 'B4', d: 0.5 },
+          { n: 'C5', d: 1, left: 'A2' },{ n: 'E4', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'D#5', d: 0.5 },
+          { n: 'E5', d: 0.5 },{ n: 'D#5', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'B4', d: 0.5 },{ n: 'D5', d: 0.5 },{ n: 'C5', d: 0.5 },
+          { n: 'A4', d: 1, left: 'A2' },{ n: 'C4', d: 0.5 },{ n: 'E4', d: 0.5 },{ n: 'A4', d: 0.5 },
+          { n: 'B4', d: 1, left: 'E2' },{ n: 'E4', d: 0.5 },{ n: 'C5', d: 0.5 },{ n: 'B4', d: 0.5 },
+          { n: 'A4', d: 1, left: 'A2' },{ n: 'B4', d: 0.5 },{ n: 'C5', d: 0.5 },{ n: 'D5', d: 0.5 },
+          // Extended return — B-like passage
+          { n: 'E5', d: 1.5, left: 'C3' },{ n: 'G4', d: 0.5 },{ n: 'F5', d: 0.5 },{ n: 'E5', d: 0.5 },
+          { n: 'D5', d: 1.5, left: 'G2' },{ n: 'F4', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'D5', d: 0.5 },
+          { n: 'C5', d: 1.5, left: 'A2' },{ n: 'E4', d: 0.5 },{ n: 'D5', d: 0.5 },{ n: 'C5', d: 0.5 },
+          { n: 'B4', d: 1, left: 'E2' },{ n: 'E4', d: 0.5 },{ n: 'E5', d: 0.5 },
+          { n: 'E5', d: 0.5 },{ n: 'E5', d: 0.5 },
+          { n: 'D#5', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'D#5', d: 0.5 },
+          { n: 'E5', d: 0.5 },{ n: 'D#5', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'D#5', d: 0.5 },
+          { n: 'E5', d: 0.5 },{ n: 'B4', d: 0.5 },{ n: 'D5', d: 0.5 },{ n: 'C5', d: 0.5 },
+          // Final A section
+          { n: 'A4', d: 1, left: 'A2' },{ n: 'C4', d: 0.5 },{ n: 'E4', d: 0.5 },{ n: 'A4', d: 0.5 },
+          { n: 'B4', d: 1, left: 'E2' },{ n: 'E4', d: 0.5 },{ n: 'G#4', d: 0.5 },{ n: 'B4', d: 0.5 },
+          { n: 'C5', d: 1, left: 'A2' },{ n: 'E4', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'D#5', d: 0.5 },
+          { n: 'E5', d: 0.5 },{ n: 'D#5', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'B4', d: 0.5 },{ n: 'D5', d: 0.5 },{ n: 'C5', d: 0.5 },
+          { n: 'A4', d: 1, left: 'A2' },{ n: 'C4', d: 0.5 },{ n: 'E4', d: 0.5 },{ n: 'A4', d: 0.5 },
+          { n: 'B4', d: 1, left: 'E2' },{ n: 'E4', d: 0.5 },{ n: 'C5', d: 0.5 },{ n: 'B4', d: 0.5 },
+          { n: 'A4', d: 1, left: 'A2' }
         ]},
-        { id: 'moonlight', title: 'Moonlight Sonata (theme)', genre: 'classical', estMin: 2, notes: [
+        { id: 'moonlight', title: 'Moonlight Sonata (theme)', genre: 'classical', notes: [
           { n: 'G#3', d: 1 },{ n: 'C#4', d: 1 },{ n: 'E4', d: 1 },{ n: 'G#3', d: 1 },{ n: 'C#4', d: 1 },{ n: 'E4', d: 1 },{ n: 'G#3', d: 1 },{ n: 'C#4', d: 1 },{ n: 'E4', d: 1 },
           { n: 'A2', d: 1 },{ n: 'A3', d: 1 },{ n: 'C#4', d: 1 },{ n: 'E4', d: 1 },{ n: 'A2', d: 1 },{ n: 'A3', d: 1 },{ n: 'C#4', d: 1 },{ n: 'E4', d: 1 }
         ]},
-        { id: 'canon-d', title: 'Canon in D (melody)', genre: 'classical', estMin: 2, notes: [
+        { id: 'canon-d', title: 'Canon in D (melody)', genre: 'classical', notes: [
           { n: 'D4', d: 1 },{ n: 'F#4', d: 1 },{ n: 'A4', d: 1 },{ n: 'F#4', d: 1 },{ n: 'E4', d: 1 },{ n: 'F#4', d: 1 },{ n: 'G4', d: 1 },{ n: 'A4', d: 1 },
           { n: 'B4', d: 1 },{ n: 'A4', d: 1 },{ n: 'G4', d: 1 },{ n: 'F#4', d: 1 },{ n: 'E4', d: 1 },{ n: 'D4', d: 1 }
         ]},
-        { id: 'minuet-g', title: 'Minuet in G (theme)', genre: 'classical', estMin: 1.5, notes: [
+        { id: 'minuet-g', title: 'Minuet in G (theme)', genre: 'classical', notes: [
           { n: 'G4', d: 0.5 },{ n: 'A4', d: 0.5 },{ n: 'B4', d: 0.5 },{ n: 'C5', d: 0.5 },{ n: 'D5', d: 1 },{ n: 'B4', d: 0.5 },{ n: 'G4', d: 0.5 },{ n: 'A4', d: 1 },
           { n: 'F#4', d: 0.5 },{ n: 'G4', d: 1.5 }
         ]},
-        { id: 'let-it-go', title: 'Let It Go (theme)', genre: 'disney', estMin: 4, notes: [
+        { id: 'let-it-go', title: 'Let It Go (theme)', genre: 'disney', notes: [
           { n: 'C4', d: 0.5, left: 'F2' },{ n: 'C4', d: 0.5 },{ n: 'C4', d: 0.5, left: 'C3' },{ n: 'C4', d: 0.5 },{ n: 'C4', d: 0.5, left: 'F2' },{ n: 'C4', d: 0.5 },{ n: 'A#3', d: 0.5 },{ n: 'C4', d: 0.5, left: 'C3' },{ n: 'A#3', d: 0.5 },{ n: 'G#3', d: 1, left: 'G#2' },
           { n: 'G#3', d: 0.5 },{ n: 'A#3', d: 0.5, left: 'F2' },{ n: 'G#3', d: 0.5 },{ n: 'A#3', d: 0.5 },{ n: 'G#3', d: 0.5 },{ n: 'G3', d: 0.5, left: 'C3' },{ n: 'F3', d: 1, left: 'F2' },
           { n: 'F3', d: 0.5, left: 'F2' },{ n: 'C4', d: 0.5 },{ n: 'C4', d: 0.5, left: 'C3' },{ n: 'C4', d: 0.5 },{ n: 'C4', d: 0.5 },{ n: 'D#4', d: 0.5, left: 'D#2' },{ n: 'D#4', d: 0.5 },{ n: 'C4', d: 1, left: 'C3' },
@@ -483,58 +697,84 @@
           { n: 'F4', d: 1, left: 'F2' },{ n: 'G4', d: 1, left: 'C3' },{ n: 'G#4', d: 2, left: 'G#2' },{ n: 'D#4', d: 1, left: 'D#2' },{ n: 'D#4', d: 1 },{ n: 'A#4', d: 2, left: 'A#2' },
           { n: 'G#4', d: 0.5 },{ n: 'A#4', d: 0.5, left: 'F2' },{ n: 'C5', d: 0.5 },{ n: 'C5', d: 0.5 },{ n: 'C5', d: 0.5 },{ n: 'C5', d: 0.5, left: 'C3' },{ n: 'G#4', d: 2, left: 'G#2' }
         ]},
-        { id: 'whole-new-world', title: 'A Whole New World (theme)', genre: 'disney', estMin: 2, notes: [
+        { id: 'whole-new-world', title: 'A Whole New World (theme)', genre: 'disney', notes: [
           { n: 'C5', d: 1 },{ n: 'B4', d: 0.5 },{ n: 'A4', d: 0.5 },{ n: 'G4', d: 1 },{ n: 'E4', d: 0.5 },{ n: 'G4', d: 0.5 },{ n: 'A4', d: 1 },{ n: 'G4', d: 1 },
           { n: 'F#4', d: 0.5 },{ n: 'E4', d: 0.5 },{ n: 'D4', d: 1 },{ n: 'C#4', d: 0.5 },{ n: 'D4', d: 0.5 },{ n: 'E4', d: 1 }
         ]},
-        { id: 'how-far-ill-go', title: 'How Far I\'ll Go (theme)', genre: 'disney', estMin: 1.5, notes: [
+        { id: 'how-far-ill-go', title: 'How Far I\'ll Go (theme)', genre: 'disney', notes: [
           { n: 'E4', d: 0.5 },{ n: 'G4', d: 0.5 },{ n: 'A4', d: 1 },{ n: 'G4', d: 0.5 },{ n: 'E4', d: 0.5 },{ n: 'D4', d: 1 },{ n: 'C4', d: 0.5 },{ n: 'D4', d: 0.5 },{ n: 'E4', d: 1 },
           { n: 'D4', d: 0.5 },{ n: 'C4', d: 0.5 },{ n: 'D4', d: 1 }
         ]},
-        { id: 'count-on-me', title: 'Count on Me (verse)', genre: 'pop', estMin: 2, notes: [
+        { id: 'count-on-me', title: 'Count on Me (verse)', genre: 'pop', notes: [
           { n: 'C5', d: 0.5 },{ n: 'C5', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'G5', d: 0.5 },{ n: 'G4', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'C5', d: 1 },{ n: 'B4', d: 0.5 },{ n: 'A4', d: 0.5 },{ n: 'G4', d: 1 },
           { n: 'C5', d: 0.5 },{ n: 'C5', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'G5', d: 0.5 },{ n: 'G4', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'C5', d: 1 }
         ]},
-        { id: 'hallelujah', title: 'Hallelujah (intro)', genre: 'pop', estMin: 2, notes: [
+        { id: 'hallelujah', title: 'Hallelujah (intro)', genre: 'pop', notes: [
           { n: 'C5', d: 1 },{ n: 'B4', d: 0.5 },{ n: 'A4', d: 0.5 },{ n: 'G4', d: 1 },{ n: 'E4', d: 0.5 },{ n: 'G4', d: 0.5 },{ n: 'A4', d: 1 },{ n: 'G4', d: 1 },
           { n: 'F4', d: 0.5 },{ n: 'E4', d: 0.5 },{ n: 'D4', d: 1 },{ n: 'C4', d: 0.5 },{ n: 'D4', d: 0.5 },{ n: 'E4', d: 1 }
         ]},
-        { id: 'someone-like-you', title: 'Someone Like You (theme)', genre: 'pop', estMin: 1.5, notes: [
+        { id: 'someone-like-you', title: 'Someone Like You (theme)', genre: 'pop', notes: [
           { n: 'A4', d: 1 },{ n: 'G4', d: 0.5 },{ n: 'E4', d: 0.5 },{ n: 'C#4', d: 1 },{ n: 'E4', d: 0.5 },{ n: 'G4', d: 0.5 },{ n: 'A4', d: 1 },{ n: 'B4', d: 0.5 },{ n: 'A4', d: 0.5 },{ n: 'G4', d: 1 },
           { n: 'F#4', d: 0.5 },{ n: 'E4', d: 0.5 },{ n: 'D4', d: 1 }
+        ]},
+        // Golden — HUNTR/X (KPop Demon Hunters, 2025) | G major (F#) | C–G–D–Em | ~100 BPM practice
+        { id: 'golden-kpop', title: 'Golden (KPop Demon Hunters)', genre: 'pop', notes: [
+          // Intro (C–G–D–Em)
+          { n: 'A4', d: 0.25 },{ n: 'A4', d: 0.25 },{ n: 'B4', d: 0.5 },{ n: 'B4', d: 0.5 },{ n: 'C5', d: 0.5, left: 'C3' },{ n: 'B4', d: 0.5 },{ n: 'A4', d: 0.5 },{ n: 'G4', d: 1, left: 'C3' },
+          { n: 'A4', d: 0.25 },{ n: 'A4', d: 0.25 },{ n: 'B4', d: 0.5 },{ n: 'B4', d: 0.5 },{ n: 'C5', d: 0.5, left: 'G2' },{ n: 'B4', d: 0.5 },{ n: 'A4', d: 0.5 },{ n: 'G4', d: 1, left: 'G2' },
+          { n: 'A4', d: 0.25 },{ n: 'A4', d: 0.25 },{ n: 'B4', d: 0.5 },{ n: 'B4', d: 0.5 },{ n: 'C5', d: 0.5, left: 'D3' },{ n: 'B4', d: 0.5 },{ n: 'A4', d: 0.5 },{ n: 'G4', d: 1, left: 'D3' },
+          { n: 'A4', d: 0.25 },{ n: 'A4', d: 0.25 },{ n: 'B4', d: 0.5 },{ n: 'B4', d: 0.5 },{ n: 'C5', d: 0.5, left: 'E3' },{ n: 'B4', d: 0.5 },{ n: 'A4', d: 0.5 },{ n: 'G4', d: 1.5, left: 'E3' },
+          // Verse 1
+          { n: 'G4', d: 0.25 },{ n: 'A4', d: 0.25 },{ n: 'B4', d: 0.5 },{ n: 'B4', d: 1, left: 'C3' },
+          { n: 'G4', d: 0.25 },{ n: 'A4', d: 0.25 },{ n: 'B4', d: 0.5 },{ n: 'B4', d: 1.5, left: 'G2' },
+          { n: 'D5', d: 1.5, left: 'D3' },{ n: 'G4', d: 0.25 },{ n: 'G4', d: 0.25 },{ n: 'A4', d: 1 },
+          { n: 'D5', d: 1.5, left: 'E3' },{ n: 'G4', d: 0.25 },{ n: 'G4', d: 0.25 },{ n: 'F#4', d: 0.5 },{ n: 'E4', d: 1 },
+          { n: 'D5', d: 1, left: 'C3' },{ n: 'A4', d: 0.5 },{ n: 'A4', d: 0.5 },{ n: 'A4', d: 1 },
+          { n: 'G4', d: 0.5, left: 'G2' },{ n: 'A4', d: 0.5 },{ n: 'A4', d: 0.5 },{ n: 'A4', d: 0.25 },{ n: 'A4', d: 0.25 },{ n: 'B4', d: 1 },
+          { n: 'D5', d: 1, left: 'D3' },{ n: 'A4', d: 0.5 },{ n: 'A4', d: 0.5 },{ n: 'A4', d: 1 },
+          { n: 'G4', d: 0.5, left: 'E3' },{ n: 'A4', d: 0.5 },{ n: 'A4', d: 0.5 },{ n: 'A4', d: 0.25 },{ n: 'G4', d: 0.25 },{ n: 'E4', d: 1 },
+          // Pre-Chorus
+          { n: 'E5', d: 0.5, left: 'C3' },{ n: 'D5', d: 0.5 },{ n: 'C5', d: 0.5 },{ n: 'D5', d: 0.5 },{ n: 'E5', d: 1 },
+          { n: 'D5', d: 0.5, left: 'G2' },{ n: 'C5', d: 0.5 },{ n: 'B4', d: 0.5 },{ n: 'A4', d: 0.5 },{ n: 'G4', d: 1 },
+          { n: 'F#4', d: 0.5, left: 'D3' },{ n: 'G4', d: 0.5 },{ n: 'A4', d: 0.5 },{ n: 'B4', d: 0.5 },{ n: 'A4', d: 1 },
+          { n: 'G4', d: 0.5, left: 'E3' },{ n: 'F#4', d: 0.5 },{ n: 'E4', d: 0.5 },{ n: 'D4', d: 0.5 },{ n: 'E4', d: 1.5 },
+          // Chorus
+          { n: 'B4', d: 0.5, left: 'C3' },{ n: 'B4', d: 0.5 },{ n: 'E5', d: 0.25 },{ n: 'E5', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'E5', d: 0.5 },
+          { n: 'B4', d: 0.5, left: 'D3' },{ n: 'B4', d: 0.5 },{ n: 'D5', d: 0.25 },{ n: 'D5', d: 0.5 },{ n: 'A4', d: 0.5 },
+          { n: 'G4', d: 0.5, left: 'G2' },{ n: 'A4', d: 0.5 },{ n: 'B4', d: 0.5 },{ n: 'D5', d: 0.5 },{ n: 'D5', d: 1 },
+          { n: 'E5', d: 0.5, left: 'E3' },{ n: 'D5', d: 0.5 },{ n: 'C5', d: 0.5 },{ n: 'B4', d: 0.5 },{ n: 'B4', d: 1 },
+          { n: 'B4', d: 0.5, left: 'C3' },{ n: 'C5', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'D5', d: 0.5 },{ n: 'C5', d: 0.5 },
+          { n: 'B4', d: 0.5, left: 'D3' },{ n: 'A4', d: 0.5 },{ n: 'D5', d: 0.5 },{ n: 'C5', d: 0.5 },{ n: 'B4', d: 0.5 },
+          { n: 'G4', d: 0.5, left: 'G2' },{ n: 'A4', d: 0.5 },{ n: 'B4', d: 0.5 },{ n: 'D5', d: 0.5 },{ n: 'D5', d: 1 },
+          { n: 'E5', d: 1, left: 'E3' },{ n: 'D5', d: 0.5 },{ n: 'B4', d: 0.5 },{ n: 'G4', d: 1.5 },
+          // Verse 2 (abbreviated)
+          { n: 'G4', d: 0.25 },{ n: 'A4', d: 0.25 },{ n: 'B4', d: 0.5 },{ n: 'B4', d: 1, left: 'C3' },
+          { n: 'G4', d: 0.25 },{ n: 'A4', d: 0.25 },{ n: 'B4', d: 0.5 },{ n: 'B4', d: 1.5, left: 'G2' },
+          { n: 'D5', d: 1.5, left: 'D3' },{ n: 'G4', d: 0.25 },{ n: 'G4', d: 0.25 },{ n: 'A4', d: 1 },
+          { n: 'D5', d: 1.5, left: 'E3' },{ n: 'G4', d: 0.25 },{ n: 'G4', d: 0.25 },{ n: 'F#4', d: 0.5 },{ n: 'E4', d: 1 },
+          // Bridge (Bm–G–D–A)
+          { n: 'F#4', d: 0.5, left: 'B2' },{ n: 'G4', d: 0.5 },{ n: 'A4', d: 0.5 },{ n: 'B4', d: 1 },{ n: 'A4', d: 0.5 },
+          { n: 'G4', d: 0.5, left: 'G2' },{ n: 'A4', d: 0.5 },{ n: 'B4', d: 1 },{ n: 'G4', d: 1 },
+          { n: 'A4', d: 0.5, left: 'D3' },{ n: 'B4', d: 0.5 },{ n: 'C5', d: 0.5 },{ n: 'D5', d: 1 },{ n: 'C5', d: 0.5 },
+          { n: 'C5', d: 0.5, left: 'A2' },{ n: 'B4', d: 0.5 },{ n: 'A4', d: 0.5 },{ n: 'G4', d: 0.5 },{ n: 'A4', d: 1.5 },
+          // Final Chorus
+          { n: 'B4', d: 0.5, left: 'C3' },{ n: 'B4', d: 0.5 },{ n: 'E5', d: 0.25 },{ n: 'E5', d: 0.5 },{ n: 'E5', d: 0.5 },{ n: 'E5', d: 0.5 },
+          { n: 'B4', d: 0.5, left: 'D3' },{ n: 'B4', d: 0.5 },{ n: 'D5', d: 0.25 },{ n: 'D5', d: 0.5 },{ n: 'A4', d: 0.5 },
+          { n: 'G4', d: 0.5, left: 'G2' },{ n: 'A4', d: 0.5 },{ n: 'B4', d: 0.5 },{ n: 'D5', d: 0.5 },{ n: 'D5', d: 1 },
+          { n: 'E5', d: 1, left: 'E3' },{ n: 'D5', d: 0.5 },{ n: 'C5', d: 0.5 },{ n: 'B4', d: 2, left: 'E3' }
         ]}
       ];
 
       function buildSession(bpm) {
-        let totalMin = 0;
-        const picked = [];
         const shuffled = [...SONGS].sort(() => Math.random() - 0.5);
-        for (const s of shuffled) {
-          if (totalMin >= SESSION_TARGET_MAX) break;
-          picked.push({
-            id: s.id,
-            title: s.title,
-            genre: s.genre,
-            estMin: s.estMin,
-            notes: s.notes.map(n => ({ n: n.n, d: n.d, left: n.left, done: false, wrong: false }))
-          });
-          totalMin += s.estMin;
-          if (totalMin >= SESSION_TARGET_MIN && totalMin <= SESSION_TARGET_MAX) break;
-        }
-        if (totalMin < SESSION_TARGET_MIN && shuffled.length > picked.length) {
-          const next = shuffled.find(x => !picked.some(p => p.id === x.id));
-          if (next) {
-            picked.push({
-              id: next.id,
-              title: next.title,
-              genre: next.genre,
-              estMin: next.estMin,
-              notes: next.notes.map(n => ({ n: n.n, d: n.d, left: n.left, done: false, wrong: false }))
-            });
-            totalMin += next.estMin;
-          }
-        }
-        return { songs: picked, estMin: Math.round(totalMin) };
+        const picked = shuffled.slice(0, SESSION_SONG_COUNT).map(s => ({
+          id: s.id,
+          title: s.title,
+          genre: s.genre,
+          notes: s.notes.map(n => ({ n: n.n, d: n.d, left: n.left, done: false, wrong: false }))
+        }));
+        const totalMs = picked.reduce((sum, s) => sum + songPlayMs(s.notes, bpm), 0);
+        return { songs: picked, totalMs };
       }
 
       let state = {
@@ -558,7 +798,8 @@
         loopPhrase: false,
         autoPlayTimeouts: [],
         autoPlayIntervalId: null,
-        autoPlayNoteIndex: -1
+        autoPlayNoteIndex: -1,
+        handMode: 'both'
       };
 
       function getScreen(id) { return document.getElementById('screen-' + id); }
@@ -653,7 +894,7 @@
                 if (state.useMic && state.session && note) {
                   const song = state.session.songs[state.songIndex];
                   const cur = song && song.notes[state.noteIndex];
-                  if (cur && cur.n === note && now - state.lastDetectedTime > state.micDebounceMs) {
+                  if (cur && targetNoteForHand(cur) === note && now - state.lastDetectedTime > state.micDebounceMs) {
                     state.lastDetectedTime = now;
                     onKeyPress(note);
                   }
@@ -711,11 +952,11 @@
       }
 
       const STAFF_LINE_SPACING = 10;
-      const TREBLE_TOP = 10;
+      const TREBLE_TOP = 50;
       const TREBLE_BOTTOM_Y = TREBLE_TOP + 4 * STAFF_LINE_SPACING;
-      const BASS_TOP = 58;
+      const BASS_TOP = 98;
       const BASS_BOTTOM_Y = BASS_TOP + 4 * STAFF_LINE_SPACING;
-      const EXTRA_BELOW_BASS = 30;
+      const EXTRA_BELOW_BASS = 20;
       const NOTE_STEP = STAFF_LINE_SPACING / 2;
       const NOTE_HEAD_W = 9;
       const NOTE_HEAD_H = 6.5;
@@ -792,7 +1033,7 @@
         const width = Math.max(380, STAFF_LEFT + CLEF_WIDTH + TIME_SIG_WIDTH + totalBeats * BEAT_WIDTH + 20);
         const height = BASS_BOTTOM_Y + EXTRA_BELOW_BASS;
         svg.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
-        svg.setAttribute('preserveAspectRatio', 'xMinYMid meet');
+        svg.setAttribute('preserveAspectRatio', 'none');
 
         let g = svg.querySelector('g.staff-group');
         if (!g) {
@@ -821,21 +1062,21 @@
 
         const brace = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         brace.setAttribute('fill', 'none');
-        brace.setAttribute('stroke', '#a8a29e');
+        brace.setAttribute('stroke', '#374151');
         brace.setAttribute('stroke-width', '1.2');
         brace.setAttribute('d', 'M ' + (STAFF_LEFT + 1) + ' ' + (TREBLE_TOP - 1) + ' L ' + (STAFF_LEFT + 1) + ' ' + (BASS_BOTTOM_Y + 1) + ' Q ' + (STAFF_LEFT - 3) + ' ' + ((TREBLE_TOP + BASS_BOTTOM_Y) / 2) + ' ' + (STAFF_LEFT + 1) + ' ' + (TREBLE_TOP - 1));
         g.appendChild(brace);
 
         const trebleClef = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         trebleClef.setAttribute('fill', 'none');
-        trebleClef.setAttribute('stroke', '#a8a29e');
+        trebleClef.setAttribute('stroke', '#374151');
         trebleClef.setAttribute('stroke-width', '1.2');
         trebleClef.setAttribute('d', 'M 12 8 Q 22 12 14 28 Q 6 44 14 60 Q 22 76 12 88 M 16 8 L 16 88');
         trebleClef.setAttribute('transform', 'translate(' + (STAFF_LEFT + 4) + ',' + (TREBLE_TOP - 8) + ') scale(0.48)');
         g.appendChild(trebleClef);
         const bassClef = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         bassClef.setAttribute('fill', 'none');
-        bassClef.setAttribute('stroke', '#a8a29e');
+        bassClef.setAttribute('stroke', '#374151');
         bassClef.setAttribute('stroke-width', '1.2');
         bassClef.setAttribute('d', 'M 8 4 L 8 84 Q 20 84 24 44 Q 28 4 8 4 M 12 4 L 12 84 Q 22 84 24 52 Q 26 4 12 4');
         bassClef.setAttribute('transform', 'translate(' + (STAFF_LEFT + 6) + ',' + (BASS_TOP - 4) + ') scale(0.38)');
@@ -844,7 +1085,7 @@
         const timeSig = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         timeSig.setAttribute('x', STAFF_LEFT + CLEF_WIDTH + 4);
         timeSig.setAttribute('y', TREBLE_TOP + STAFF_LINE_SPACING * 2 + 2);
-        timeSig.setAttribute('fill', '#a8a29e');
+        timeSig.setAttribute('fill', '#374151');
         timeSig.setAttribute('font-size', '12');
         timeSig.setAttribute('font-weight', 'bold');
         timeSig.setAttribute('font-family', 'Georgia, serif');
@@ -853,7 +1094,7 @@
         const timeSig2 = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         timeSig2.setAttribute('x', STAFF_LEFT + CLEF_WIDTH + 4);
         timeSig2.setAttribute('y', TREBLE_TOP + STAFF_LINE_SPACING * 4 + 2);
-        timeSig2.setAttribute('fill', '#a8a29e');
+        timeSig2.setAttribute('fill', '#374151');
         timeSig2.setAttribute('font-size', '12');
         timeSig2.setAttribute('font-weight', 'bold');
         timeSig2.setAttribute('font-family', 'Georgia, serif');
@@ -910,25 +1151,41 @@
       function setKeyboardHighlight(handNotes) {
         const wrap = document.getElementById('keyboardWrap');
         if (!wrap) return;
+        let scrollTarget = null;
         wrap.querySelectorAll('.key').forEach(el => {
           const n = el.dataset.note;
           el.classList.remove('highlight-left', 'highlight-right');
           if (handNotes && handNotes.left === n) el.classList.add('highlight-left');
-          if (handNotes && handNotes.right === n) el.classList.add('highlight-right');
+          if (handNotes && handNotes.right === n) {
+            el.classList.add('highlight-right');
+            scrollTarget = el;
+          }
         });
+        if (scrollTarget) {
+          scrollTarget.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
       }
 
       function handNotesFromCur(cur) {
         if (!cur) return null;
-        if (cur.left) return { right: cur.n, left: cur.left };
-        return { right: cur.n, left: null };
+        if (state.handMode === 'right') return { right: cur.n, left: null };
+        if (state.handMode === 'left') return { right: null, left: cur.left || null };
+        return cur.left ? { right: cur.n, left: cur.left } : { right: cur.n, left: null };
+      }
+
+      function syncSheetMusicWidthToKeyboard() {
+        const sheetWrap = document.getElementById('sheetMusicWrap');
+        if (!sheetWrap) return;
+        sheetWrap.style.removeProperty('min-width');
+        sheetWrap.style.removeProperty('width');
+        sheetWrap.style.removeProperty('max-width');
       }
 
       function renderKeyboard(handNotes) {
         const wrap = document.getElementById('keyboard');
         if (!wrap) return;
         wrap.innerHTML = '';
-        const keys = allKeys(2, 37);
+        const keys = allKeys(2, 48);
         keys.forEach(k => {
           const el = document.createElement('div');
           el.className = 'key' + (k.black ? ' black' : '');
@@ -944,26 +1201,39 @@
         });
       }
 
+      function showSongScore(song) {
+        const playable = song.notes.filter(n => noteRequiredForHand(n));
+        const correct = playable.filter(n => n.done && !n.wrongCount).length;
+        const pct = Math.round(correct / Math.max(playable.length, 1) * 100);
+        const { medal, isNew, best } = saveScore(song.id, pct);
+        document.getElementById('scoreMedalIcon').textContent = medalEmoji(medal);
+        document.getElementById('scorePct').textContent = pct + '%';
+        const labelEl = document.getElementById('scoreMedalLabel');
+        labelEl.textContent = medal ? medal.charAt(0).toUpperCase() + medal.slice(1) + '!' : 'Keep practicing!';
+        labelEl.className = 'score-medal-label ' + (medal || 'none');
+        document.getElementById('scoreSongTitle').textContent = song.title;
+        document.getElementById('scoreDetail').textContent = correct + ' of ' + playable.length + ' notes perfect';
+        const bestEl = document.getElementById('scoreBest');
+        bestEl.textContent = isNew && best.pct > 0 ? '★ New best score!' : (best.pct > pct ? 'Best: ' + best.pct + '% ' + medalEmoji(best.medal) : '');
+        const isLast = state.songIndex >= state.session.songs.length - 1;
+        document.getElementById('scoreNextBtn').textContent = isLast ? 'Finish' : 'Next song →';
+        document.getElementById('scoreOverlay').classList.add('visible');
+      }
+
       function onKeyPress(noteName) {
         if (!state.session || state.songIndex >= state.session.songs.length) return;
         const song = state.session.songs[state.songIndex];
         const cur = song.notes[state.noteIndex];
         if (!cur) return;
-        if (cur.n === noteName) {
+        const target = targetNoteForHand(cur);
+        if (noteName === target) {
           cur.done = true;
           cur.wrong = false;
           state.noteIndex++;
           state.listenFirstPlayed = false;
+          advancePastSkipped(song);
           if (state.noteIndex >= song.notes.length) {
-            state.noteIndex = 0;
-            state.songIndex++;
-            if (state.songIndex >= state.session.songs.length) {
-              document.getElementById('doneSummary').textContent = 'You played ' + state.session.songs.length + ' pieces. Great focus!';
-              showScreen('done');
-            } else {
-              state.phraseStart = 0;
-              renderPlayScreen();
-            }
+            showSongScore(song);
           } else if (state.practiceMode && state.loopPhrase && state.noteIndex >= state.phraseStart + state.phraseLength) {
             state.noteIndex = state.phraseStart;
             for (let i = state.phraseStart; i < state.phraseStart + state.phraseLength && i < song.notes.length; i++) {
@@ -1004,8 +1274,10 @@
         const song = state.session.songs[state.songIndex];
         const cur = song.notes[state.noteIndex];
         if (!cur) return;
+        const target = targetNoteForHand(cur);
+        if (!target) return;
         const durationMs = state.practiceSlow ? 800 : 400;
-        playNote(cur.n, durationMs);
+        playNote(target, durationMs);
         state.listenFirstPlayed = true;
       }
 
@@ -1054,6 +1326,8 @@
               const durationMs = Math.min(note.d * msPerQuarter, 2000);
               state.autoPlayNoteIndex = i;
               setKeyboardHighlight(note.left ? { right: note.n, left: note.left } : { right: note.n, left: null });
+              const badgeEl = document.getElementById('currentNoteLabel');
+              if (badgeEl) badgeEl.textContent = note.n.replace('#','♯');
               renderSheetMusic();
               playNote(note.n, durationMs);
               if (note.left) playNote(note.left, durationMs);
@@ -1068,8 +1342,10 @@
       function renderPlayScreen() {
         updateTempoUI();
         const song = state.session.songs[state.songIndex];
+        advancePastSkipped(song);
         document.getElementById('playSongTitle').textContent = song.title;
-        document.getElementById('playProgress').textContent = 'Song ' + (state.songIndex + 1) + ' of ' + state.session.songs.length;
+        const playDur = fmtDuration(songPlayMs(song.notes, state.bpm));
+        document.getElementById('playProgress').textContent = 'Song ' + (state.songIndex + 1) + ' of ' + state.session.songs.length + ' · ' + playDur;
         setUseMic(state.useMic);
         document.getElementById('practiceModeCheck').checked = state.practiceMode;
         document.getElementById('practiceDetails').classList.toggle('visible', state.practiceMode);
@@ -1078,6 +1354,9 @@
         document.getElementById('phrase4').classList.toggle('active', state.phraseLength === 4);
         document.getElementById('phrase8').classList.toggle('active', state.phraseLength === 8);
         document.getElementById('loopPhraseCheck').checked = state.loopPhrase;
+        document.getElementById('handBoth').classList.toggle('active', state.handMode === 'both');
+        document.getElementById('handRight').classList.toggle('active', state.handMode === 'right');
+        document.getElementById('handLeft').classList.toggle('active', state.handMode === 'left');
         const strip = document.getElementById('notationStrip');
         strip.innerHTML = '';
         const start = Math.max(0, state.noteIndex - 2);
@@ -1089,12 +1368,26 @@
           if (n.done) chip.classList.add('done');
           else if (n.wrong) chip.classList.add('wrong');
           else if (i === state.noteIndex) chip.classList.add('current');
-          chip.textContent = n.n.replace('#','♯');
+          const chipNote = state.handMode === 'left' ? (n.left || n.n) : n.n;
+          chip.textContent = chipNote.replace('#','♯');
           strip.appendChild(chip);
         }
         const nextNote = song.notes[state.noteIndex];
+        const badgeEl = document.getElementById('currentNoteLabel');
+        if (badgeEl) {
+          const hasAnyLeft = song.notes.some(n => n.left);
+          if (state.handMode === 'left' && !hasAnyLeft) {
+            badgeEl.textContent = 'no left notes';
+            badgeEl.style.fontSize = '.75rem';
+          } else {
+            const target = nextNote ? targetNoteForHand(nextNote) : null;
+            badgeEl.textContent = target ? target.replace('#','♯') : '—';
+            badgeEl.style.fontSize = '';
+          }
+        }
         renderSheetMusic();
         renderKeyboard(handNotesFromCur(nextNote));
+        syncSheetMusicWidthToKeyboard();
         if (state.practiceMode && nextNote && !state.listenFirstPlayed) {
           setTimeout(playCurrentNoteForListenFirst, 300);
         }
@@ -1111,27 +1404,32 @@
         });
         const ses = buildSession(state.bpm);
         const el = document.getElementById('sessionEst');
-        if (el) el.textContent = '~' + ses.estMin + ' min session';
+        if (el) el.textContent = SESSION_SONG_COUNT + ' songs · ~' + fmtDuration(ses.totalMs);
       }
 
       function renderSongList(genre) {
         const list = document.getElementById('songList');
         list.innerHTML = '';
+        const scores = loadScores();
         const filtered = genre === 'all' ? SONGS : SONGS.filter(s => s.genre === genre);
         filtered.forEach(song => {
           const card = document.createElement('div');
           card.className = 'song-card';
-          card.innerHTML = '<div><div class="title">' + song.title + '</div><div class="meta">~' + song.estMin + ' min</div></div><span class="genre-tag">' + song.genre + '</span>';
+          const best = scores[song.id];
+          const scoreHtml = best
+            ? '<div class="song-score"><span class="song-medal">' + medalEmoji(best.medal) + '</span><span class="song-score-pct">' + best.pct + '%</span></div>'
+            : '<span class="genre-tag">' + song.genre + '</span>';
+          const dur = fmtDuration(songPlayMs(song.notes, state.bpm));
+          card.innerHTML = '<div><div class="title">' + song.title + '</div><div class="meta">' + song.notes.length + ' notes · ' + dur + '</div></div>' + scoreHtml;
           card.onclick = () => {
             state.session = {
               songs: [{
                 id: song.id,
                 title: song.title,
                 genre: song.genre,
-                estMin: song.estMin,
                 notes: song.notes.map(n => ({ n: n.n, d: n.d, left: n.left, done: false, wrong: false }))
               }],
-              estMin: song.estMin
+              totalMs: songPlayMs(song.notes, state.bpm)
             };
             state.songIndex = 0;
             state.noteIndex = 0;
@@ -1160,7 +1458,7 @@
         state.session = buildSession(state.bpm);
         state.songIndex = 0;
         state.noteIndex = 0;
-        state.session.songs.forEach(s => s.notes.forEach(n => { n.done = false; n.wrong = false; }));
+        state.session.songs.forEach(s => s.notes.forEach(n => { n.done = false; n.wrong = false; n.wrongCount = 0; }));
         showScreen('play');
         renderPlayScreen();
       };
@@ -1177,7 +1475,7 @@
         if (state.songIndex > 0) {
           state.songIndex--;
           state.noteIndex = 0;
-          state.session.songs[state.songIndex].notes.forEach(n => { n.done = false; n.wrong = false; });
+          state.session.songs[state.songIndex].notes.forEach(n => { n.done = false; n.wrong = false; n.wrongCount = 0; });
           renderPlayScreen();
         }
       };
@@ -1185,7 +1483,7 @@
         if (state.songIndex < state.session.songs.length - 1) {
           state.songIndex++;
           state.noteIndex = 0;
-          state.session.songs[state.songIndex].notes.forEach(n => { n.done = false; n.wrong = false; });
+          state.session.songs[state.songIndex].notes.forEach(n => { n.done = false; n.wrong = false; n.wrongCount = 0; });
           renderPlayScreen();
         } else {
           document.getElementById('doneSummary').textContent = 'You played ' + state.session.songs.length + ' pieces. Great focus!';
@@ -1197,6 +1495,43 @@
 
       document.getElementById('modeTap').onclick = () => setUseMic(false);
       document.getElementById('modeMic').onclick = () => setUseMic(true);
+
+      function setHandMode(mode) {
+        state.handMode = mode;
+        document.getElementById('handBoth').classList.toggle('active', mode === 'both');
+        document.getElementById('handRight').classList.toggle('active', mode === 'right');
+        document.getElementById('handLeft').classList.toggle('active', mode === 'left');
+        if (state.session && state.session.songs[state.songIndex]) {
+          const song = state.session.songs[state.songIndex];
+          // reset wrong/done state when switching hands so scoring stays clean
+          song.notes.forEach(n => { n.done = false; n.wrong = false; n.wrongCount = 0; });
+          state.noteIndex = 0;
+          renderPlayScreen();
+        }
+      }
+      document.getElementById('handBoth').onclick = () => setHandMode('both');
+      document.getElementById('handRight').onclick = () => setHandMode('right');
+      document.getElementById('handLeft').onclick = () => setHandMode('left');
+
+      document.getElementById('scoreTryAgainBtn').onclick = () => {
+        document.getElementById('scoreOverlay').classList.remove('visible');
+        const song = state.session.songs[state.songIndex];
+        state.noteIndex = 0;
+        song.notes.forEach(n => { n.done = false; n.wrong = false; n.wrongCount = 0; });
+        renderPlayScreen();
+      };
+      document.getElementById('scoreNextBtn').onclick = () => {
+        document.getElementById('scoreOverlay').classList.remove('visible');
+        state.noteIndex = 0;
+        state.songIndex++;
+        if (state.songIndex >= state.session.songs.length) {
+          document.getElementById('doneSummary').textContent = 'You played ' + state.session.songs.length + ' pieces. Great focus!';
+          showScreen('done');
+        } else {
+          state.phraseStart = 0;
+          renderPlayScreen();
+        }
+      };
 
       document.getElementById('practiceModeCheck').onchange = function() {
         setPracticeMode(this.checked);
