@@ -811,8 +811,12 @@
       }
 
       function initAudio() {
-        if (state.audioCtx) return state.audioCtx;
+        if (state.audioCtx) {
+          if (state.audioCtx.state === 'suspended') state.audioCtx.resume();
+          return state.audioCtx;
+        }
         state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        state.audioCtx.resume();
         return state.audioCtx;
       }
       function playNote(name, durationMs) {
@@ -1301,6 +1305,7 @@
 
       function startAutoPlay() {
         if (!state.session || state.songIndex >= state.session.songs.length) return;
+        initAudio(); // resume AudioContext during user gesture (required on mobile)
         stopAutoPlay();
         const song = state.session.songs[state.songIndex];
         const notes = song.notes;
