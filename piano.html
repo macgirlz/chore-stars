@@ -811,13 +811,24 @@
       }
 
       function initAudio() {
-        if (state.audioCtx) {
-          if (state.audioCtx.state === 'suspended') state.audioCtx.resume();
-          return state.audioCtx;
+        if (!state.audioCtx) {
+          state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         }
-        state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        state.audioCtx.resume();
         return state.audioCtx;
+      }
+      // Must be called synchronously inside a user gesture to unlock audio on iOS Safari.
+      function unlockAudioForGesture() {
+        const ctx = initAudio();
+        // Play a silent one-sample buffer — this is the only reliable way to unlock
+        // WebAudio on iOS, where resume() alone is insufficient.
+        try {
+          const buf = ctx.createBuffer(1, 1, ctx.sampleRate);
+          const src = ctx.createBufferSource();
+          src.buffer = buf;
+          src.connect(ctx.destination);
+          src.start(0);
+        } catch (_) {}
+        if (ctx.state === 'suspended') ctx.resume();
       }
       function playNote(name, durationMs) {
         try {
@@ -1198,6 +1209,7 @@
           if (handNotes && handNotes.left === k.name) el.classList.add('highlight-left');
           if (handNotes && handNotes.right === k.name) el.classList.add('highlight-right');
           el.addEventListener('click', () => {
+            unlockAudioForGesture();
             playNote(k.name, 200);
             onKeyPress(k.name);
           });
@@ -1275,6 +1287,7 @@
 
       function playCurrentNoteForListenFirst() {
         if (!state.session || state.songIndex >= state.session.songs.length) return;
+        unlockAudioForGesture();
         const song = state.session.songs[state.songIndex];
         const cur = song.notes[state.noteIndex];
         if (!cur) return;
@@ -1305,7 +1318,7 @@
 
       function startAutoPlay() {
         if (!state.session || state.songIndex >= state.session.songs.length) return;
-        initAudio(); // resume AudioContext during user gesture (required on mobile)
+        unlockAudioForGesture();
         stopAutoPlay();
         const song = state.session.songs[state.songIndex];
         const notes = song.notes;
